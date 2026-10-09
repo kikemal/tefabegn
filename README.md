@@ -185,18 +185,30 @@ Staff-only endpoints under `/staff`:
 | GET | `/staff/claims/:claimId` | Claim + verification evidence package |
 | POST | `/staff/claims/:claimId/decision` | `APPROVE` / `REJECT` / `REQUEST_MORE_INFO` |
 | POST | `/staff/reports/found/:id/ready-for-handover` | Mark approved found item `HANDOVER_PENDING` |
+| POST | `/staff/reports/found/:id/confirm-return` | Staff marks physical return → `RETURNED` |
+| POST | `/staff/reports/found/:id/close-case` | Staff closes returned case → `CLOSED` |
 
 Every decision writes a case/audit event (`CLAIM_APPROVED`, `CLAIM_REJECTED`, `CLAIM_MORE_INFO_REQUESTED`, `HANDOVER_READY`).
+
+### Handover and return (TASK-013)
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| POST | `/staff/reports/found/:id/confirm-return` | Bearer + staff | Record physical return (`returnedAt`, `HANDOVER_COMPLETED`) |
+| POST | `/claims/:id/confirm-receipt` | Bearer (approved claimant) | Optional recipient acknowledgement (`RETURN_CONFIRMED`) |
+| POST | `/staff/reports/found/:id/close-case` | Bearer + staff | Close case after return (`CASE_CLOSED`) |
+
+Ordinary users cannot mark an item returned. Recipient confirmation does not by itself set `RETURNED`.
 
 ### Case status workflow (TASK-012)
 
 Status changes go through a shared state machine in `backend/src/workflow/`:
 
 - report: `DRAFT` → `ACTIVE` → `POSSIBLE_MATCH` → `CLAIM_PENDING` → `UNDER_REVIEW` → `APPROVED` → `HANDOVER_PENDING` → `RETURNED` → `CLOSED` (plus cancel/reject branches)
-- claim: `SUBMITTED` → `UNDER_REVIEW` / `NEEDS_MORE_INFO` → `APPROVED` | `REJECTED` | `WITHDRAWN`
+- claim: `SUBMITTED` → `UNDER_REVIEW` / `NEEDS_MORE_INFO` → `APPROVED` | `REJECTED` | `WITHDRAWN` → `CLOSED`
 - match: `SUGGESTED` → `ACCEPTED_FOR_REVIEW` | `DISMISSED` | `CLOSED`
 
-Invalid transitions return `409 INVALID_STATUS`. API responses include both machine `status` values and human-readable `statusLabel` fields. Physical return confirmation remains TASK-013.
+Invalid transitions return `409 INVALID_STATUS`. API responses include both machine `status` values and human-readable `statusLabel` fields.
 
 ### Checks
 

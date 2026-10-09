@@ -3,6 +3,8 @@ import { ZodError } from "zod";
 import { requireAuth, requireStaff } from "../middleware/auth";
 import { AppError } from "../middleware/errorHandler";
 import { ok } from "../types/api";
+import { closeCaseByStaff, confirmReturnByStaff } from "../handover/service";
+import { closeCaseSchema, confirmReturnSchema } from "../handover/validation";
 import {
   decideClaim,
   getStaffClaimReview,
@@ -88,6 +90,42 @@ staffRouter.post("/reports/found/:foundReportId/ready-for-handover", async (req,
     }
     const input = readyForHandoverSchema.parse(req.body ?? {});
     const result = await markFoundReadyForHandover(req.user!, foundReportId, input);
+    res.status(200).json(ok(result));
+  } catch (error) {
+    if (error instanceof ZodError) {
+      next(validationError(error));
+      return;
+    }
+    next(error);
+  }
+});
+
+staffRouter.post("/reports/found/:foundReportId/confirm-return", async (req, res, next) => {
+  try {
+    const foundReportId = req.params.foundReportId;
+    if (!foundReportId) {
+      throw new AppError(400, "VALIDATION_ERROR", "Found report id is required");
+    }
+    const input = confirmReturnSchema.parse(req.body ?? {});
+    const result = await confirmReturnByStaff(req.user!, foundReportId, input);
+    res.status(200).json(ok(result));
+  } catch (error) {
+    if (error instanceof ZodError) {
+      next(validationError(error));
+      return;
+    }
+    next(error);
+  }
+});
+
+staffRouter.post("/reports/found/:foundReportId/close-case", async (req, res, next) => {
+  try {
+    const foundReportId = req.params.foundReportId;
+    if (!foundReportId) {
+      throw new AppError(400, "VALIDATION_ERROR", "Found report id is required");
+    }
+    const input = closeCaseSchema.parse(req.body ?? {});
+    const result = await closeCaseByStaff(req.user!, foundReportId, input);
     res.status(200).json(ok(result));
   } catch (error) {
     if (error instanceof ZodError) {

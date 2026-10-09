@@ -19,6 +19,7 @@ function report(partial: Partial<ItemReport> & Pick<ItemReport, "type" | "title"
     identifier: partial.identifier ?? null,
     imageRef: partial.imageRef ?? null,
     shareRef: partial.shareRef ?? null,
+    returnedAt: partial.returnedAt ?? null,
     reporterId: partial.reporterId ?? "user",
     createdAt: partial.createdAt ?? now,
     updatedAt: partial.updatedAt ?? now,

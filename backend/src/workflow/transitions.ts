@@ -3,8 +3,7 @@ import { AppError } from "../middleware/errorHandler";
 import { claimStatusLabel, matchStatusLabel, reportStatusLabel } from "./labels";
 
 /**
- * Allowed report status transitions (TASK-012).
- * RETURNED / final CLOSE after handover are reserved for TASK-013.
+ * Allowed report status transitions (TASK-012 / TASK-013).
  */
 export const REPORT_TRANSITIONS: Record<ReportStatus, readonly ReportStatus[]> = {
   DRAFT: [ReportStatus.ACTIVE, ReportStatus.CANCELLED, ReportStatus.CLOSED],
@@ -33,7 +32,7 @@ export const REPORT_TRANSITIONS: Record<ReportStatus, readonly ReportStatus[]> =
     ReportStatus.ACTIVE,
     ReportStatus.REJECTED,
   ],
-  APPROVED: [ReportStatus.HANDOVER_PENDING, ReportStatus.CLOSED],
+  APPROVED: [ReportStatus.HANDOVER_PENDING, ReportStatus.RETURNED, ReportStatus.CLOSED],
   REJECTED: [ReportStatus.CLOSED, ReportStatus.ACTIVE],
   HANDOVER_PENDING: [ReportStatus.RETURNED, ReportStatus.CLOSED],
   RETURNED: [ReportStatus.CLOSED],

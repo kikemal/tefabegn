@@ -3,6 +3,8 @@ import { ZodError } from "zod";
 import { requireAuth } from "../middleware/auth";
 import { AppError } from "../middleware/errorHandler";
 import { ok } from "../types/api";
+import { confirmReceiptByClaimant } from "../handover/service";
+import { confirmReceiptSchema } from "../handover/validation";
 import { createClaim, getClaimById, listMyClaims, withdrawClaim } from "./service";
 import { createClaimSchema } from "./validation";
 
@@ -58,6 +60,24 @@ claimsRouter.post("/:id/withdraw", requireAuth, async (req, res, next) => {
     const claim = await withdrawClaim(req.user!, id);
     res.status(200).json(ok({ claim }));
   } catch (error) {
+    next(error);
+  }
+});
+
+claimsRouter.post("/:id/confirm-receipt", requireAuth, async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    if (!id) {
+      throw new AppError(400, "VALIDATION_ERROR", "Claim id is required");
+    }
+    const input = confirmReceiptSchema.parse(req.body ?? {});
+    const result = await confirmReceiptByClaimant(req.user!, id, input);
+    res.status(200).json(ok(result));
+  } catch (error) {
+    if (error instanceof ZodError) {
+      next(validationError(error));
+      return;
+    }
     next(error);
   }
 });
