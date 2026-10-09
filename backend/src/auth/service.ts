@@ -3,20 +3,13 @@ import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../db/prisma";
 import { env } from "../config/env";
 import type { AuthTokenPair, PublicUser } from "../types/auth";
+import { toPublicUser } from "../users/mapper";
+import { getOwnProfile } from "../users/service";
 import { hashPassword, verifyPassword } from "./passwords";
 import { createRefreshTokenValue, hashRefreshToken, signAccessToken } from "./tokens";
 import type { LoginInput, RegisterInput } from "./validation";
 
-function toPublicUser(user: User): PublicUser {
-  return {
-    id: user.id,
-    email: user.email,
-    fullName: user.fullName,
-    role: user.role,
-    status: user.status,
-    createdAt: user.createdAt,
-  };
-}
+export { getOwnProfile as getUserById };
 
 async function issueTokenPair(user: User): Promise<AuthTokenPair> {
   const refreshToken = createRefreshTokenValue();
@@ -117,15 +110,4 @@ export async function logoutSession(refreshToken: string): Promise<void> {
     where: { id: stored.id },
     data: { revokedAt: new Date() },
   });
-}
-
-export async function getUserById(userId: string): Promise<PublicUser> {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) {
-    throw new AppError(401, "UNAUTHORIZED", "Authentication required");
-  }
-  if (user.status !== AccountStatus.ACTIVE) {
-    throw new AppError(403, "ACCOUNT_DISABLED", "This account is disabled");
-  }
-  return toPublicUser(user);
 }
