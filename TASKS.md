@@ -237,6 +237,8 @@ Found reports can be created and safely retrieved without leaking private eviden
 
 ## TASK-007 — Search and Filtering
 
+**Status:** Completed
+
 ### Goal
 Provide backend search for lost/found reports.
 
