@@ -98,6 +98,8 @@ Create the backend project foundation without implementing business modules yet.
 
 ## TASK-002 — Database Foundation
 
+**Status:** Completed
+
 ### Goal
 Set up the database connection, migration strategy, and schema foundation.
 

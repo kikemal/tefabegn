@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tefabign-postgres
+    restart: unless-stopped
+    ports:
+      # Host 5433 avoids clashing with a local PostgreSQL install on 5432.
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: tefabign
+      POSTGRES_PASSWORD: tefabign
+      POSTGRES_DB: tefabign
+    volumes:
+      - tefabign_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tefabign -d tefabign"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  tefabign_pg_data:

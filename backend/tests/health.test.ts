@@ -1,6 +1,7 @@
 import request from "supertest";
-import { describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import { createApp } from "../src/app";
+import { disconnectDatabase } from "../src/db/prisma";
 
 describe("GET /health", () => {
   it("returns a healthy status payload", async () => {
@@ -17,6 +18,27 @@ describe("GET /health", () => {
       },
     });
     expect(typeof response.body.data.timestamp).toBe("string");
+  });
+});
+
+describe("GET /health/ready", () => {
+  afterAll(async () => {
+    await disconnectDatabase();
+  });
+
+  it("reports ready when the database is reachable", async () => {
+    const app = createApp();
+
+    const response = await request(app).get("/health/ready");
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({
+      success: true,
+      data: {
+        status: "ready",
+        database: "up",
+      },
+    });
   });
 });
 
