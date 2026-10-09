@@ -157,6 +157,8 @@ Do not assume every authenticated user can perform staff actions.
 
 ## TASK-004 — User and Profile Module
 
+**Status:** Completed
+
 ### Goal
 Implement authenticated user profile/account operations.
 

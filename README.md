@@ -86,6 +86,16 @@ Public registration always creates role `USER`. Staff role (`STAFF`) is not self
 
 Passwords are hashed with bcrypt. Access tokens are JWTs; refresh tokens are stored hashed and can be revoked.
 
+### Users / profile (TASK-004)
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| GET | `/users/me` | Bearer | View own profile |
+| PATCH | `/users/me` | Bearer | Update own `fullName` / `email` only |
+| GET | `/users/:id` | Bearer | Own profile, or staff viewing another user |
+
+Users cannot change their own `role` or `status`. Responses never include `passwordHash`.
+
 ### Checks
 
 ```bash
