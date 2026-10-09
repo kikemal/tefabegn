@@ -1,9 +1,11 @@
 import type { ItemReport } from "@prisma/client";
+import { reportStatusLabel } from "../workflow";
 
 export type PublicLostReport = {
   id: string;
   type: "LOST";
   status: ItemReport["status"];
+  statusLabel: string;
   category: string;
   title: string;
   description: string;
@@ -26,6 +28,7 @@ export type PublicFoundReport = {
   id: string;
   type: "FOUND";
   status: ItemReport["status"];
+  statusLabel: string;
   category: string;
   title: string;
   publicDescription: string | null;
@@ -50,6 +53,7 @@ export function toPublicLostReport(report: ItemReport): PublicLostReport {
     id: report.id,
     type: "LOST",
     status: report.status,
+    statusLabel: reportStatusLabel(report.status),
     category: report.category,
     title: report.title,
     description: report.description,
@@ -76,6 +80,7 @@ export function toPublicFoundReport(report: ItemReport): PublicFoundReport {
     id: report.id,
     type: "FOUND",
     status: report.status,
+    statusLabel: reportStatusLabel(report.status),
     category: report.category,
     title: report.title,
     publicDescription: report.publicDescription,

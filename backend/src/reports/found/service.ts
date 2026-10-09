@@ -4,14 +4,18 @@ import { AppError } from "../../middleware/errorHandler";
 import { prisma } from "../../db/prisma";
 import type { AuthenticatedUser } from "../../types/auth";
 import {
+  OWNER_CANCELLABLE_REPORT_STATUSES,
+  OWNER_CLOSEABLE_REPORT_STATUSES,
+  OWNER_EDITABLE_REPORT_STATUSES,
+  assertReportTransition,
+} from "../../workflow";
+import {
   toOwnerFoundReport,
   toPublicFoundReport,
   type PrivateFoundReport,
   type PublicFoundReport,
 } from "../mappers";
 import type { CreateFoundReportInput, UpdateFoundReportInput } from "./validation";
-
-const OWNER_EDITABLE_STATUSES: ReportStatus[] = [ReportStatus.DRAFT, ReportStatus.ACTIVE];
 
 function createShareRef(): string {
   return `FF-${randomBytes(4).toString("hex").toUpperCase()}`;
@@ -48,7 +52,7 @@ function assertOwner(report: ItemReport, userId: string): void {
 }
 
 function assertEditable(report: ItemReport): void {
-  if (!OWNER_EDITABLE_STATUSES.includes(report.status)) {
+  if (!OWNER_EDITABLE_REPORT_STATUSES.includes(report.status)) {
     throw new AppError(409, "INVALID_STATUS", "This report can no longer be edited");
   }
 }
@@ -148,9 +152,11 @@ export async function cancelFoundReport(
   if (report.status === ReportStatus.CANCELLED) {
     return toOwnerFoundReport(report);
   }
-  if (!OWNER_EDITABLE_STATUSES.includes(report.status)) {
+  if (!OWNER_CANCELLABLE_REPORT_STATUSES.includes(report.status)) {
     throw new AppError(409, "INVALID_STATUS", "This report cannot be cancelled");
   }
+
+  assertReportTransition(report.status, ReportStatus.CANCELLED);
 
   const updated = await prisma.itemReport.update({
     where: { id: reportId },
@@ -170,9 +176,11 @@ export async function closeFoundReport(
   if (report.status === ReportStatus.CLOSED) {
     return toOwnerFoundReport(report);
   }
-  if (report.status !== ReportStatus.ACTIVE && report.status !== ReportStatus.DRAFT) {
+  if (!OWNER_CLOSEABLE_REPORT_STATUSES.includes(report.status)) {
     throw new AppError(409, "INVALID_STATUS", "This report cannot be closed");
   }
+
+  assertReportTransition(report.status, ReportStatus.CLOSED);
 
   const updated = await prisma.itemReport.update({
     where: { id: reportId },

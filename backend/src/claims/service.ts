@@ -11,16 +11,16 @@ import {
 import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../db/prisma";
 import type { AuthenticatedUser } from "../types/auth";
+import {
+  ACTIVE_CLAIM_STATUSES,
+  CLAIMABLE_FOUND_STATUSES,
+  REPORT_STATUSES_ENTERING_CLAIM,
+  WITHDRAWABLE_CLAIM_STATUSES,
+  assertClaimTransition,
+  assertReportTransition,
+} from "../workflow";
 import { toClaimResponse } from "./mappers";
 import type { CreateClaimInput } from "./validation";
-
-const ACTIVE_CLAIM_STATUSES: ClaimStatus[] = [
-  ClaimStatus.SUBMITTED,
-  ClaimStatus.NEEDS_MORE_INFO,
-  ClaimStatus.UNDER_REVIEW,
-];
-
-const WITHDRAWABLE_STATUSES: ClaimStatus[] = [ClaimStatus.SUBMITTED, ClaimStatus.NEEDS_MORE_INFO];
 
 type ClaimWithRelations = Claim & {
   foundReport: ItemReport | null;
@@ -96,7 +96,7 @@ export async function createClaim(user: AuthenticatedUser, input: CreateClaimInp
     throw new AppError(404, "REPORT_NOT_FOUND", "Found report not found");
   }
 
-  if (foundReport.status === ReportStatus.CANCELLED || foundReport.status === ReportStatus.CLOSED) {
+  if (!CLAIMABLE_FOUND_STATUSES.includes(foundReport.status)) {
     throw new AppError(409, "INVALID_STATUS", "This found report cannot be claimed");
   }
 
@@ -116,7 +116,7 @@ export async function createClaim(user: AuthenticatedUser, input: CreateClaimInp
     where: {
       claimantId: user.id,
       foundReportId: foundReport.id,
-      status: { in: ACTIVE_CLAIM_STATUSES },
+      status: { in: [...ACTIVE_CLAIM_STATUSES] },
     },
   });
   if (existingActive) {
@@ -130,7 +130,7 @@ export async function createClaim(user: AuthenticatedUser, input: CreateClaimInp
   const conflictingCount = await prisma.claim.count({
     where: {
       foundReportId: foundReport.id,
-      status: { in: ACTIVE_CLAIM_STATUSES },
+      status: { in: [...ACTIVE_CLAIM_STATUSES] },
     },
   });
 
@@ -150,14 +150,16 @@ export async function createClaim(user: AuthenticatedUser, input: CreateClaimInp
     },
   });
 
-  if (foundReport.status === ReportStatus.ACTIVE) {
+  if (REPORT_STATUSES_ENTERING_CLAIM.includes(foundReport.status)) {
+    assertReportTransition(foundReport.status, ReportStatus.CLAIM_PENDING);
     await prisma.itemReport.update({
       where: { id: foundReport.id },
       data: { status: ReportStatus.CLAIM_PENDING },
     });
   }
 
-  if (lostReport && lostReport.status === ReportStatus.ACTIVE) {
+  if (lostReport && REPORT_STATUSES_ENTERING_CLAIM.includes(lostReport.status)) {
+    assertReportTransition(lostReport.status, ReportStatus.CLAIM_PENDING);
     await prisma.itemReport.update({
       where: { id: lostReport.id },
       data: { status: ReportStatus.CLAIM_PENDING },
@@ -239,9 +241,11 @@ export async function withdrawClaim(user: AuthenticatedUser, claimId: string) {
   if (claim.claimantId !== user.id && user.role !== Role.STAFF) {
     throw new AppError(403, "FORBIDDEN", "You are not allowed to withdraw this claim");
   }
-  if (!WITHDRAWABLE_STATUSES.includes(claim.status)) {
+  if (!WITHDRAWABLE_CLAIM_STATUSES.includes(claim.status)) {
     throw new AppError(409, "INVALID_STATUS", "This claim cannot be withdrawn");
   }
+
+  assertClaimTransition(claim.status, ClaimStatus.WITHDRAWN);
 
   const updated = await prisma.claim.update({
     where: { id: claimId },
