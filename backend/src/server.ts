@@ -1,5 +1,6 @@
 import { createApp } from "./app";
 import { env } from "./config/env";
+import { disconnectDatabase } from "./db/prisma";
 
 const app = createApp();
 
@@ -10,7 +11,9 @@ const server = app.listen(env.PORT, () => {
 function shutdown(signal: string): void {
   console.log(`Received ${signal}. Shutting down gracefully...`);
   server.close(() => {
-    process.exit(0);
+    void disconnectDatabase().finally(() => {
+      process.exit(0);
+    });
   });
 }
 

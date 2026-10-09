@@ -1,0 +1,200 @@
+// ጠፋብኝ (Tefabign) — schema foundation only.
+// Business workflows, auth behavior, and API modules come in later tasks.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  STAFF
+}
+
+enum AccountStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum ReportType {
+  LOST
+  FOUND
+}
+
+/// Controlled case statuses aligned with TASK-012; transitions enforced later.
+enum ReportStatus {
+  DRAFT
+  ACTIVE
+  POSSIBLE_MATCH
+  CLAIM_PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  HANDOVER_PENDING
+  RETURNED
+  CLOSED
+  CANCELLED
+}
+
+enum MatchStatus {
+  SUGGESTED
+  DISMISSED
+  ACCEPTED_FOR_REVIEW
+  CLOSED
+}
+
+enum ClaimStatus {
+  SUBMITTED
+  NEEDS_MORE_INFO
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  WITHDRAWN
+  CLOSED
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  passwordHash String
+  fullName     String
+  role         Role          @default(USER)
+  status       AccountStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  reports       ItemReport[]
+  claims        Claim[]
+  notifications Notification[]
+  caseEvents    CaseEvent[]  @relation("CaseEventActor")
+
+  @@index([role, status])
+  @@index([createdAt])
+}
+
+model ItemReport {
+  id                String       @id @default(cuid())
+  type              ReportType
+  status            ReportStatus @default(DRAFT)
+  category          String
+  title             String
+  description       String
+  location          String
+  /// When the item was lost or found.
+  eventOccurredAt   DateTime?
+  /// Public-safe summary suitable for search/list responses.
+  publicDescription String?
+  /// Private verification details — never expose on public endpoints.
+  privateDetails    String?
+  /// Optional serial / IMEI / unique identifier.
+  identifier        String?
+  /// Storage reference for an image (path/key), not binary data.
+  imageRef          String?
+  /// Shareable public reference code for the report.
+  shareRef          String?      @unique
+  reporterId        String
+  reporter          User         @relation(fields: [reporterId], references: [id], onDelete: Restrict)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  lostMatches  Match[]     @relation("LostReport")
+  foundMatches Match[]     @relation("FoundReport")
+  claims       Claim[]
+  caseEvents   CaseEvent[]
+
+  @@index([type, status])
+  @@index([category])
+  @@index([location])
+  @@index([eventOccurredAt])
+  @@index([reporterId])
+  @@index([createdAt])
+  @@index([title])
+  @@index([identifier])
+}
+
+model Match {
+  id            String      @id @default(cuid())
+  lostReportId  String
+  foundReportId String
+  score         Float
+  /// Structured match signals/reasons (suggestion aid only — never auto-approval).
+  reasons       Json
+  status        MatchStatus @default(SUGGESTED)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  lostReport  ItemReport @relation("LostReport", fields: [lostReportId], references: [id], onDelete: Restrict)
+  foundReport ItemReport @relation("FoundReport", fields: [foundReportId], references: [id], onDelete: Restrict)
+  claims      Claim[]
+
+  @@unique([lostReportId, foundReportId])
+  @@index([status, score])
+  @@index([createdAt])
+}
+
+model Claim {
+  id            String      @id @default(cuid())
+  claimantId    String
+  foundReportId String?
+  matchId       String?
+  message       String?
+  /// Claimant-supplied ownership evidence — private.
+  evidence      String?
+  proofRef      String?
+  status        ClaimStatus @default(SUBMITTED)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  claimant    User        @relation(fields: [claimantId], references: [id], onDelete: Restrict)
+  foundReport ItemReport? @relation(fields: [foundReportId], references: [id], onDelete: Restrict)
+  match       Match?      @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  caseEvents  CaseEvent[]
+
+  @@index([claimantId, status])
+  @@index([foundReportId])
+  @@index([matchId])
+  @@index([status, createdAt])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  readAt    DateTime?
+  /// Non-sensitive metadata only — never store private evidence here.
+  metadata  Json?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@index([type])
+}
+
+/// Immutable case/audit history (application must not update/delete rows in normal flows).
+model CaseEvent {
+  id        String   @id @default(cuid())
+  reportId  String?
+  claimId   String?
+  actorId   String?
+  eventType String
+  /// Safe metadata only — never store private evidence or secrets.
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  report ItemReport? @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  claim  Claim?      @relation(fields: [claimId], references: [id], onDelete: SetNull)
+  actor  User?       @relation("CaseEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([reportId, createdAt])
+  @@index([claimId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([eventType, createdAt])
+}

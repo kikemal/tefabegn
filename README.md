@@ -28,23 +28,32 @@ Begin with `TASK-001` in `TASKS.md`.
 - `RULES.md` — Cursor role, engineering and security rules
 - `GITHUB_WORKFLOW.md` — Git/GitHub ownership and workflow
 - `REQUIREMENTS.md` — product requirements and agreed additions
+- `DATABASE.md` — database engine, schema entities, and migration commands
 
 ## Backend (local)
 
-The API lives in `backend/`. Stack for foundation: Node.js, TypeScript, Express.
+The API lives in `backend/`. Stack: Node.js, TypeScript, Express, PostgreSQL, Prisma.
 
 ### Prerequisites
 
 - Node.js 20+
 - npm 10+
+- Docker (for local PostgreSQL)
 
 ### Setup
 
 ```bash
+# start PostgreSQL (host port 5433 → container 5432)
+docker compose up -d
+
 cd backend
 cp .env.example .env
 npm install
+npm run db:migrate
 ```
+
+Default local DB URL uses `127.0.0.1:5433` so it does not clash with another Postgres on 5432.
+See `DATABASE.md` for schema details.
 
 ### Run
 
@@ -59,7 +68,8 @@ npm start
 
 Default URL: `http://localhost:3000`
 
-Health check: `GET http://localhost:3000/health`
+- Health: `GET http://localhost:3000/health`
+- Readiness (includes DB ping): `GET http://localhost:3000/health/ready`
 
 ### Checks
 
