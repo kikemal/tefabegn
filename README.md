@@ -125,6 +125,17 @@ Users cannot change their own `role` or `status`. Responses never include `passw
 Public found responses expose only public-safe fields (`publicDescription`, title, category, location, etc.).  
 `description`, `privateDetails`, `identifier`, and `imageRef` are private verification fields.
 
+### Search (TASK-007)
+
+`GET /reports/search` (Bearer auth)
+
+Query params: `category`, `location`, `type`, `status`, `dateFrom`, `dateTo`, `q`, `page`, `pageSize`
+
+- Default status filter: `ACTIVE` (override with `status`)
+- Ordering: `createdAt desc`, then `id desc`
+- Results are public-safe only (no private verification fields)
+- Text search (`q`) uses public-safe fields only
+
 ### Checks
 
 ```bash
