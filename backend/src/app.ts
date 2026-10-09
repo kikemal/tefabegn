@@ -1,4 +1,5 @@
 import express from "express";
+import { authRouter } from "./auth/routes";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { healthRouter } from "./routes/health";
 
@@ -20,6 +21,7 @@ export function createApp() {
   });
 
   app.use("/health", healthRouter);
+  app.use("/auth", authRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

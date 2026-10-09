@@ -126,6 +126,8 @@ The original academic design explicitly centers on users/staff, item reports, ma
 
 ## TASK-003 — Authentication
 
+**Status:** Completed
+
 ### Goal
 Implement secure user authentication.
 

@@ -33,6 +33,7 @@ npm run db:studio     # optional Prisma Studio
 | Model | Purpose |
 | --- | --- |
 | `User` | Campus users and authorized staff |
+| `RefreshToken` | Hashed refresh tokens for logout/revocation |
 | `ItemReport` | Lost or found item reports |
 | `Match` | Suggested lost↔found pairing (never auto-approval) |
 | `Claim` | Ownership claim against a found item / match |

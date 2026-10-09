@@ -71,6 +71,21 @@ Default URL: `http://localhost:3000`
 - Health: `GET http://localhost:3000/health`
 - Readiness (includes DB ping): `GET http://localhost:3000/health/ready`
 
+### Auth (TASK-003)
+
+Public registration always creates role `USER`. Staff role (`STAFF`) is not self-assignable.
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| POST | `/auth/register` | no | Register (email, password, fullName) |
+| POST | `/auth/login` | no | Login |
+| POST | `/auth/refresh` | refresh token body | Rotate tokens |
+| POST | `/auth/logout` | refresh token body | Revoke refresh token |
+| GET | `/auth/me` | Bearer access token | Current user |
+| GET | `/auth/staff/ping` | Bearer + staff role | Staff authorization check |
+
+Passwords are hashed with bcrypt. Access tokens are JWTs; refresh tokens are stored hashed and can be revoked.
+
 ### Checks
 
 ```bash
