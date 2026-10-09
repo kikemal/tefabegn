@@ -382,6 +382,8 @@ Every decision creates an audit/case event.
 
 ## TASK-012 — Case Status Workflow
 
+**Status:** Completed
+
 ### Goal
 Enforce valid state transitions.
 

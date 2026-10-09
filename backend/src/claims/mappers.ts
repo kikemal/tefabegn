@@ -1,10 +1,12 @@
 import type { Claim, ItemReport, Match } from "@prisma/client";
 import { toPublicFoundReport, type PublicFoundReport } from "../reports/mappers";
+import { claimStatusLabel, matchStatusLabel } from "../workflow";
 
 export type ClaimMatchSummary = {
   id: string;
   score: number;
   status: Match["status"];
+  statusLabel: string;
   lostReportId: string;
   foundReportId: string;
 };
@@ -12,6 +14,7 @@ export type ClaimMatchSummary = {
 export type ClaimResponse = {
   id: string;
   status: Claim["status"];
+  statusLabel: string;
   message: string | null;
   /** Claimant's own submitted evidence — never staff/found hidden answers. */
   evidence: string | null;
@@ -34,6 +37,7 @@ export function toClaimResponse(claim: ClaimWithRelations): ClaimResponse {
   return {
     id: claim.id,
     status: claim.status,
+    statusLabel: claimStatusLabel(claim.status),
     message: claim.message,
     evidence: claim.evidence,
     proofRef: claim.proofRef,
@@ -50,6 +54,7 @@ export function toClaimResponse(claim: ClaimWithRelations): ClaimResponse {
           id: claim.match.id,
           score: claim.match.score,
           status: claim.match.status,
+          statusLabel: matchStatusLabel(claim.match.status),
           lostReportId: claim.match.lostReportId,
           foundReportId: claim.match.foundReportId,
         }

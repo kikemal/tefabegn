@@ -1,15 +1,22 @@
-import { ClaimStatus, ReportType, type Claim, type ItemReport, type Prisma } from "@prisma/client";
+import {
+  ClaimStatus,
+  ReportStatus,
+  ReportType,
+  type Claim,
+  type ItemReport,
+  type Prisma,
+} from "@prisma/client";
 import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../db/prisma";
 import type { AuthenticatedUser } from "../types/auth";
+import {
+  REPORT_STATUSES_ENTERING_REVIEW,
+  VERIFIABLE_CLAIM_STATUSES,
+  assertClaimTransition,
+  assertReportTransition,
+} from "../workflow";
 import { toVerificationPackage } from "./mappers";
 import type { RecordVerificationAttemptInput } from "./validation";
-
-const VERIFIABLE_STATUSES: ClaimStatus[] = [
-  ClaimStatus.SUBMITTED,
-  ClaimStatus.NEEDS_MORE_INFO,
-  ClaimStatus.UNDER_REVIEW,
-];
 
 type ClaimWithFound = Claim & { foundReport: ItemReport };
 
@@ -52,7 +59,7 @@ export async function getVerificationPackage(claimId: string) {
 export async function listClaimsForVerification() {
   const claims = await prisma.claim.findMany({
     where: {
-      status: { in: VERIFIABLE_STATUSES },
+      status: { in: [...VERIFIABLE_CLAIM_STATUSES] },
       foundReportId: { not: null },
     },
     include: { foundReport: true },
@@ -88,11 +95,16 @@ export async function recordVerificationAttempt(
 ) {
   const claim = await loadClaimForVerification(claimId);
 
-  if (!VERIFIABLE_STATUSES.includes(claim.status)) {
-    throw new AppError(409, "INVALID_STATUS", "This claim cannot be verified in its current status");
+  if (!VERIFIABLE_CLAIM_STATUSES.includes(claim.status)) {
+    throw new AppError(
+      409,
+      "INVALID_STATUS",
+      "This claim cannot be verified in its current status",
+    );
   }
 
   const nextStatus = input.requestMoreInfo ? ClaimStatus.NEEDS_MORE_INFO : ClaimStatus.UNDER_REVIEW;
+  assertClaimTransition(claim.status, nextStatus);
 
   const updated = await prisma.claim.update({
     where: { id: claimId },
@@ -102,6 +114,14 @@ export async function recordVerificationAttempt(
 
   if (!updated.foundReport) {
     throw new AppError(404, "CLAIM_NOT_FOUND", "Claim not found");
+  }
+
+  if (REPORT_STATUSES_ENTERING_REVIEW.includes(updated.foundReport.status)) {
+    assertReportTransition(updated.foundReport.status, ReportStatus.UNDER_REVIEW);
+    await prisma.itemReport.update({
+      where: { id: updated.foundReport.id },
+      data: { status: ReportStatus.UNDER_REVIEW },
+    });
   }
 
   await recordCaseEvent({

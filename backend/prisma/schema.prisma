@@ -25,7 +25,7 @@ enum ReportType {
   FOUND
 }
 
-/// Controlled case statuses aligned with TASK-012; transitions enforced later.
+/// Controlled case statuses; transitions enforced by `src/workflow` (TASK-012).
 enum ReportStatus {
   DRAFT
   ACTIVE

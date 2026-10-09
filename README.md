@@ -188,6 +188,16 @@ Staff-only endpoints under `/staff`:
 
 Every decision writes a case/audit event (`CLAIM_APPROVED`, `CLAIM_REJECTED`, `CLAIM_MORE_INFO_REQUESTED`, `HANDOVER_READY`).
 
+### Case status workflow (TASK-012)
+
+Status changes go through a shared state machine in `backend/src/workflow/`:
+
+- report: `DRAFT` → `ACTIVE` → `POSSIBLE_MATCH` → `CLAIM_PENDING` → `UNDER_REVIEW` → `APPROVED` → `HANDOVER_PENDING` → `RETURNED` → `CLOSED` (plus cancel/reject branches)
+- claim: `SUBMITTED` → `UNDER_REVIEW` / `NEEDS_MORE_INFO` → `APPROVED` | `REJECTED` | `WITHDRAWN`
+- match: `SUGGESTED` → `ACCEPTED_FOR_REVIEW` | `DISMISSED` | `CLOSED`
+
+Invalid transitions return `409 INVALID_STATUS`. API responses include both machine `status` values and human-readable `statusLabel` fields. Physical return confirmation remains TASK-013.
+
 ### Checks
 
 ```bash

@@ -12,19 +12,16 @@ import { prisma } from "../db/prisma";
 import { toOwnerFoundReport, toOwnerLostReport, toPublicFoundReport } from "../reports/mappers";
 import type { AuthenticatedUser } from "../types/auth";
 import { toVerificationPackage } from "../verification/mappers";
+import {
+  ACTIVE_CLAIM_STATUSES,
+  DECIDABLE_CLAIM_STATUSES,
+  REPORT_STATUSES_APPROVABLE,
+  REPORT_STATUSES_REVERT_AFTER_REJECT,
+  assertClaimTransition,
+  assertMatchTransition,
+  assertReportTransition,
+} from "../workflow";
 import type { ReadyForHandoverInput, StaffClaimDecisionInput } from "./validation";
-
-const DECIDABLE_CLAIM_STATUSES: ClaimStatus[] = [
-  ClaimStatus.SUBMITTED,
-  ClaimStatus.NEEDS_MORE_INFO,
-  ClaimStatus.UNDER_REVIEW,
-];
-
-const ACTIVE_CLAIM_STATUSES: ClaimStatus[] = [
-  ClaimStatus.SUBMITTED,
-  ClaimStatus.NEEDS_MORE_INFO,
-  ClaimStatus.UNDER_REVIEW,
-];
 
 async function recordCaseEvent(input: {
   reportId?: string;
@@ -120,6 +117,7 @@ export async function decideClaim(
   }
 
   if (input.decision === "REQUEST_MORE_INFO") {
+    assertClaimTransition(claim.status, ClaimStatus.NEEDS_MORE_INFO);
     const updated = await prisma.claim.update({
       where: { id: claimId },
       data: { status: ClaimStatus.NEEDS_MORE_INFO },
@@ -138,6 +136,7 @@ export async function decideClaim(
   }
 
   if (input.decision === "REJECT") {
+    assertClaimTransition(claim.status, ClaimStatus.REJECTED);
     const updated = await prisma.claim.update({
       where: { id: claimId },
       data: { status: ClaimStatus.REJECTED },
@@ -148,11 +147,15 @@ export async function decideClaim(
       where: {
         foundReportId: claim.foundReportId!,
         id: { not: claimId },
-        status: { in: ACTIVE_CLAIM_STATUSES },
+        status: { in: [...ACTIVE_CLAIM_STATUSES] },
       },
     });
 
-    if (remainingActive === 0 && claim.foundReport.status === ReportStatus.CLAIM_PENDING) {
+    if (
+      remainingActive === 0 &&
+      REPORT_STATUSES_REVERT_AFTER_REJECT.includes(claim.foundReport.status)
+    ) {
+      assertReportTransition(claim.foundReport.status, ReportStatus.ACTIVE);
       await prisma.itemReport.update({
         where: { id: claim.foundReport.id },
         data: { status: ReportStatus.ACTIVE },
@@ -171,6 +174,16 @@ export async function decideClaim(
   }
 
   // APPROVE
+  assertClaimTransition(claim.status, ClaimStatus.APPROVED);
+  if (!REPORT_STATUSES_APPROVABLE.includes(claim.foundReport.status)) {
+    throw new AppError(
+      409,
+      "INVALID_STATUS",
+      "This found report cannot be approved in its current status",
+    );
+  }
+  assertReportTransition(claim.foundReport.status, ReportStatus.APPROVED);
+
   const updated = await prisma.$transaction(async (tx) => {
     const approved = await tx.claim.update({
       where: { id: claimId },
@@ -184,10 +197,15 @@ export async function decideClaim(
     });
 
     if (claim.match?.lostReport) {
-      await tx.itemReport.update({
-        where: { id: claim.match.lostReport.id },
-        data: { status: ReportStatus.APPROVED },
-      });
+      const lost = claim.match.lostReport;
+      if (REPORT_STATUSES_APPROVABLE.includes(lost.status)) {
+        assertReportTransition(lost.status, ReportStatus.APPROVED);
+        await tx.itemReport.update({
+          where: { id: lost.id },
+          data: { status: ReportStatus.APPROVED },
+        });
+      }
+      assertMatchTransition(claim.match.status, MatchStatus.ACCEPTED_FOR_REVIEW);
       await tx.match.update({
         where: { id: claim.match.id },
         data: { status: MatchStatus.ACCEPTED_FOR_REVIEW },
@@ -195,14 +213,22 @@ export async function decideClaim(
     }
 
     // Competing active claims on the same found item are rejected.
-    await tx.claim.updateMany({
+    const competitors = await tx.claim.findMany({
       where: {
         foundReportId: claim.foundReportId!,
         id: { not: claimId },
-        status: { in: ACTIVE_CLAIM_STATUSES },
+        status: { in: [...ACTIVE_CLAIM_STATUSES] },
       },
-      data: { status: ClaimStatus.REJECTED },
     });
+    for (const competitor of competitors) {
+      assertClaimTransition(competitor.status, ClaimStatus.REJECTED);
+    }
+    if (competitors.length > 0) {
+      await tx.claim.updateMany({
+        where: { id: { in: competitors.map((c) => c.id) } },
+        data: { status: ClaimStatus.REJECTED },
+      });
+    }
 
     return approved;
   });
@@ -234,6 +260,8 @@ export async function markFoundReadyForHandover(
       "Only an approved found item can be marked ready for handover",
     );
   }
+
+  assertReportTransition(report.status, ReportStatus.HANDOVER_PENDING);
 
   const approvedClaim = await prisma.claim.findFirst({
     where: { foundReportId, status: ClaimStatus.APPROVED },

@@ -11,11 +11,13 @@ function uniqueEmail(prefix: string): string {
 
 async function register(prefix: string) {
   const email = uniqueEmail(prefix);
-  const response = await request(app).post("/auth/register").send({
-    email,
-    password: "securePass1",
-    fullName: `${prefix} User`,
-  });
+  const response = await request(app)
+    .post("/auth/register")
+    .send({
+      email,
+      password: "securePass1",
+      fullName: `${prefix} User`,
+    });
   return {
     accessToken: response.body.data.tokens.accessToken as string,
   };

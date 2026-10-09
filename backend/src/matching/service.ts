@@ -16,6 +16,7 @@ import {
   toPublicLostReport,
 } from "../reports/mappers";
 import type { AuthenticatedUser } from "../types/auth";
+import { MATCHABLE_REPORT_STATUSES, assertReportTransition, matchStatusLabel } from "../workflow";
 import { scoreLostFoundPair } from "./scoring";
 import type { GenerateMatchesInput, ListMatchesQuery } from "./validation";
 import { MATCH_SCORE_THRESHOLD } from "./weights";
@@ -40,6 +41,7 @@ function toMatchResponse(viewer: AuthenticatedUser, match: MatchWithReports) {
     id: match.id,
     score: match.score,
     status: match.status,
+    statusLabel: matchStatusLabel(match.status),
     reasons: match.reasons,
     createdAt: match.createdAt.toISOString(),
     updatedAt: match.updatedAt.toISOString(),
@@ -52,6 +54,17 @@ function toMatchResponse(viewer: AuthenticatedUser, match: MatchWithReports) {
       ? toOwnerFoundReport(match.foundReport)
       : toPublicFoundReport(match.foundReport),
   };
+}
+
+async function markPossibleMatch(report: ItemReport): Promise<void> {
+  if (report.status !== ReportStatus.ACTIVE) {
+    return;
+  }
+  assertReportTransition(report.status, ReportStatus.POSSIBLE_MATCH);
+  await prisma.itemReport.update({
+    where: { id: report.id },
+    data: { status: ReportStatus.POSSIBLE_MATCH },
+  });
 }
 
 async function recordCaseEvent(
@@ -134,6 +147,9 @@ async function upsertSuggestion(
     },
   });
 
+  await markPossibleMatch(lost);
+  await markPossibleMatch(found);
+
   await recordCaseEvent(lost.id, actorId, "MATCH_SUGGESTED", {
     matchId: match.id,
     foundReportId: found.id,
@@ -145,7 +161,11 @@ async function upsertSuggestion(
     score: scored.score,
   });
 
-  return match;
+  const refreshed = await prisma.match.findUnique({
+    where: { id: match.id },
+    include: { lostReport: true, foundReport: true },
+  });
+  return refreshed ?? match;
 }
 
 export async function generateMatches(user: AuthenticatedUser, input: GenerateMatchesInput) {
@@ -173,7 +193,7 @@ export async function generateMatches(user: AuthenticatedUser, input: GenerateMa
     const candidates = await prisma.itemReport.findMany({
       where: {
         type: ReportType.FOUND,
-        status: ReportStatus.ACTIVE,
+        status: { in: [...MATCHABLE_REPORT_STATUSES] },
         ...(lost.category ? { category: lost.category } : {}),
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -199,7 +219,7 @@ export async function generateMatches(user: AuthenticatedUser, input: GenerateMa
     const candidates = await prisma.itemReport.findMany({
       where: {
         type: ReportType.LOST,
-        status: ReportStatus.ACTIVE,
+        status: { in: [...MATCHABLE_REPORT_STATUSES] },
         ...(found.category ? { category: found.category } : {}),
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
