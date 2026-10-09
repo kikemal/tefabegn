@@ -176,6 +176,8 @@ A user cannot read or modify another user's private account data without authori
 
 ## TASK-005 — Lost Item Reports
 
+**Status:** Completed
+
 ### Goal
 Allow authenticated users to create and manage lost-item reports.
 
