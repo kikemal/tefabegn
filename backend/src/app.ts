@@ -1,6 +1,7 @@
 import express from "express";
 import { authRouter } from "./auth/routes";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
+import { matchesRouter } from "./matching/routes";
 import { foundReportsRouter } from "./reports/found/routes";
 import { lostReportsRouter } from "./reports/lost/routes";
 import { searchReportsRouter } from "./reports/search/routes";
@@ -30,6 +31,7 @@ export function createApp() {
   app.use("/reports/lost", lostReportsRouter);
   app.use("/reports/found", foundReportsRouter);
   app.use("/reports/search", searchReportsRouter);
+  app.use("/matches", matchesRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
