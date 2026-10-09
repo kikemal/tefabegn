@@ -8,6 +8,7 @@ import { lostReportsRouter } from "./reports/lost/routes";
 import { searchReportsRouter } from "./reports/search/routes";
 import { healthRouter } from "./routes/health";
 import { usersRouter } from "./users/routes";
+import { verificationRouter } from "./verification/routes";
 
 export function createApp() {
   const app = express();
@@ -34,6 +35,7 @@ export function createApp() {
   app.use("/reports/search", searchReportsRouter);
   app.use("/matches", matchesRouter);
   app.use("/claims", claimsRouter);
+  app.use("/verification", verificationRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

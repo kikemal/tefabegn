@@ -1,0 +1,131 @@
+import { ClaimStatus, ReportType, type Claim, type ItemReport, type Prisma } from "@prisma/client";
+import { AppError } from "../middleware/errorHandler";
+import { prisma } from "../db/prisma";
+import type { AuthenticatedUser } from "../types/auth";
+import { toVerificationPackage } from "./mappers";
+import type { RecordVerificationAttemptInput } from "./validation";
+
+const VERIFIABLE_STATUSES: ClaimStatus[] = [
+  ClaimStatus.SUBMITTED,
+  ClaimStatus.NEEDS_MORE_INFO,
+  ClaimStatus.UNDER_REVIEW,
+];
+
+type ClaimWithFound = Claim & { foundReport: ItemReport };
+
+async function recordCaseEvent(input: {
+  reportId?: string;
+  claimId?: string;
+  actorId: string;
+  eventType: string;
+  metadata?: Prisma.InputJsonValue;
+}): Promise<void> {
+  await prisma.caseEvent.create({
+    data: {
+      reportId: input.reportId,
+      claimId: input.claimId,
+      actorId: input.actorId,
+      eventType: input.eventType,
+      metadata: input.metadata,
+    },
+  });
+}
+
+async function loadClaimForVerification(claimId: string): Promise<ClaimWithFound> {
+  const claim = await prisma.claim.findUnique({
+    where: { id: claimId },
+    include: { foundReport: true },
+  });
+
+  if (!claim || !claim.foundReport || claim.foundReport.type !== ReportType.FOUND) {
+    throw new AppError(404, "CLAIM_NOT_FOUND", "Claim not found");
+  }
+
+  return claim as ClaimWithFound;
+}
+
+export async function getVerificationPackage(claimId: string) {
+  const claim = await loadClaimForVerification(claimId);
+  return toVerificationPackage(claim);
+}
+
+export async function listClaimsForVerification() {
+  const claims = await prisma.claim.findMany({
+    where: {
+      status: { in: VERIFIABLE_STATUSES },
+      foundReportId: { not: null },
+    },
+    include: { foundReport: true },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+  });
+
+  return claims.flatMap((claim) => {
+    if (!claim.foundReport) {
+      return [];
+    }
+    const packed = toVerificationPackage(claim as ClaimWithFound);
+    return [
+      {
+        claimId: claim.id,
+        claimStatus: claim.status,
+        claimantId: claim.claimantId,
+        foundReportId: claim.foundReportId,
+        createdAt: claim.createdAt.toISOString(),
+        publicFound: packed.publicFound,
+      },
+    ];
+  });
+}
+
+/**
+ * Records a staff verification attempt.
+ * Never sets APPROVED/REJECTED — final decision belongs to staff review (TASK-011).
+ */
+export async function recordVerificationAttempt(
+  staff: AuthenticatedUser,
+  claimId: string,
+  input: RecordVerificationAttemptInput,
+) {
+  const claim = await loadClaimForVerification(claimId);
+
+  if (!VERIFIABLE_STATUSES.includes(claim.status)) {
+    throw new AppError(409, "INVALID_STATUS", "This claim cannot be verified in its current status");
+  }
+
+  const nextStatus = input.requestMoreInfo ? ClaimStatus.NEEDS_MORE_INFO : ClaimStatus.UNDER_REVIEW;
+
+  const updated = await prisma.claim.update({
+    where: { id: claimId },
+    data: { status: nextStatus },
+    include: { foundReport: true },
+  });
+
+  if (!updated.foundReport) {
+    throw new AppError(404, "CLAIM_NOT_FOUND", "Claim not found");
+  }
+
+  await recordCaseEvent({
+    reportId: updated.foundReportId ?? undefined,
+    claimId: updated.id,
+    actorId: staff.id,
+    eventType: "VERIFICATION_RECORDED",
+    metadata: {
+      assessment: input.assessment,
+      notes: input.notes,
+      requestMoreInfo: input.requestMoreInfo,
+      resultingStatus: nextStatus,
+      autoApproved: false,
+    },
+  });
+
+  return {
+    verification: toVerificationPackage(updated as ClaimWithFound),
+    attempt: {
+      assessment: input.assessment,
+      notes: input.notes,
+      requestMoreInfo: input.requestMoreInfo,
+      resultingStatus: nextStatus,
+      autoApproved: false as const,
+    },
+  };
+}
