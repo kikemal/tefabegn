@@ -300,6 +300,8 @@ Given suitable lost/found records, the service can generate ranked candidate mat
 
 ## TASK-009 — Claims
 
+**Status:** Completed
+
 ### Goal
 Allow a user to claim a found item or a possible match.
 

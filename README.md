@@ -149,6 +149,18 @@ Matching only produces **suggestions**. It never auto-approves claims or ownersh
 Signals (weighted): category, location, date proximity, title, description, optional identifier.  
 Responses include `suggestionOnly: true` and safe match reasons (no private evidence values).
 
+### Claims (TASK-009)
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| POST | `/claims` | Bearer | Claim a found item and/or match |
+| GET | `/claims/mine` | Bearer | List own claims |
+| GET | `/claims/:id` | Bearer | Claim detail (authorized parties) |
+| POST | `/claims/:id/withdraw` | Bearer (claimant) | Withdraw SUBMITTED/NEEDS_MORE_INFO claim |
+
+Claimants never receive found-item private verification fields (`privateDetails`, `identifier`, private `imageRef`, internal `description`).  
+Duplicate active claims by the same user are rejected; competing claims are reported via `conflictingActiveClaims`.
+
 ### Checks
 
 ```bash
