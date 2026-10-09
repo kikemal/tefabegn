@@ -96,6 +96,20 @@ Passwords are hashed with bcrypt. Access tokens are JWTs; refresh tokens are sto
 
 Users cannot change their own `role` or `status`. Responses never include `passwordHash`.
 
+### Lost reports (TASK-005)
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| POST | `/reports/lost` | Bearer | Create lost report |
+| GET | `/reports/lost/mine` | Bearer | List own lost reports (includes private fields) |
+| GET | `/reports/lost` | Bearer + staff | Staff review list (includes private fields) |
+| GET | `/reports/lost/:id` | Bearer | Detail — private fields only for owner/staff |
+| PATCH | `/reports/lost/:id` | Bearer (owner) | Update while DRAFT/ACTIVE |
+| POST | `/reports/lost/:id/cancel` | Bearer (owner) | Cancel report |
+| POST | `/reports/lost/:id/close` | Bearer (owner) | Close report |
+
+`privateDetails` and `identifier` are never returned to non-owner, non-staff viewers.
+
 ### Checks
 
 ```bash

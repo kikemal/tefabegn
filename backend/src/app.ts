@@ -1,6 +1,7 @@
 import express from "express";
 import { authRouter } from "./auth/routes";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
+import { lostReportsRouter } from "./reports/lost/routes";
 import { healthRouter } from "./routes/health";
 import { usersRouter } from "./users/routes";
 
@@ -24,6 +25,7 @@ export function createApp() {
   app.use("/health", healthRouter);
   app.use("/auth", authRouter);
   app.use("/users", usersRouter);
+  app.use("/reports/lost", lostReportsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
