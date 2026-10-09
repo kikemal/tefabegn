@@ -262,6 +262,8 @@ At minimum support sensible combinations of:
 
 ## TASK-008 — Matching Engine v1
 
+**Status:** Completed
+
 ### Goal
 Create deterministic matching logic that identifies possible lost↔found matches.
 

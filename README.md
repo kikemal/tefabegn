@@ -136,6 +136,19 @@ Query params: `category`, `location`, `type`, `status`, `dateFrom`, `dateTo`, `q
 - Results are public-safe only (no private verification fields)
 - Text search (`q`) uses public-safe fields only
 
+### Matching (TASK-008)
+
+Matching only produces **suggestions**. It never auto-approves claims or ownership.
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| POST | `/matches/generate` | Bearer (owner/staff) | Generate ranked lost↔found suggestions |
+| GET | `/matches` | Bearer | List visible matches |
+| GET | `/matches/:id` | Bearer | Match detail |
+
+Signals (weighted): category, location, date proximity, title, description, optional identifier.  
+Responses include `suggestionOnly: true` and safe match reasons (no private evidence values).
+
 ### Checks
 
 ```bash
