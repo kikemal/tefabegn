@@ -357,6 +357,8 @@ The claimant supplies evidence. Staff sees the relevant private evidence and mak
 
 ## TASK-011 — Staff Review and Decision
 
+**Status:** Completed
+
 ### Goal
 Create staff-only review endpoints/services.
 

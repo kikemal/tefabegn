@@ -173,6 +173,21 @@ Staff-only. Verification **never auto-approves** a claim.
 
 Recording an attempt moves the claim to `UNDER_REVIEW` or `NEEDS_MORE_INFO` and writes a `VERIFICATION_RECORDED` audit event. Final approve/reject remains a later staff decision task.
 
+### Staff review (TASK-011)
+
+Staff-only endpoints under `/staff`:
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/staff/reports` | Review lost/found reports |
+| GET | `/staff/matches` | Review match suggestions |
+| GET | `/staff/claims` | Review claims |
+| GET | `/staff/claims/:claimId` | Claim + verification evidence package |
+| POST | `/staff/claims/:claimId/decision` | `APPROVE` / `REJECT` / `REQUEST_MORE_INFO` |
+| POST | `/staff/reports/found/:id/ready-for-handover` | Mark approved found item `HANDOVER_PENDING` |
+
+Every decision writes a case/audit event (`CLAIM_APPROVED`, `CLAIM_REJECTED`, `CLAIM_MORE_INFO_REQUESTED`, `HANDOVER_READY`).
+
 ### Checks
 
 ```bash
