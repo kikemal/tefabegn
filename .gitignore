@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+.env.production
+!.env.example
+
+# Build output
+dist/
+build/
+coverage/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test / cache
+.cache/
+.turbo/
+*.tsbuildinfo
+
+# Uploads and private evidence (never commit)
+uploads/
+private-evidence/
+*.pem
+*.key
+credentials.json
