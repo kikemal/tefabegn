@@ -110,6 +110,21 @@ Users cannot change their own `role` or `status`. Responses never include `passw
 
 `privateDetails` and `identifier` are never returned to non-owner, non-staff viewers.
 
+### Found reports (TASK-006)
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| POST | `/reports/found` | Bearer | Create found report |
+| GET | `/reports/found/mine` | Bearer | List own found reports (includes private fields) |
+| GET | `/reports/found` | Bearer + staff | Staff review list (includes private fields) |
+| GET | `/reports/found/:id` | Bearer | Public-safe detail; private fields only for finder/staff |
+| PATCH | `/reports/found/:id` | Bearer (finder) | Update while DRAFT/ACTIVE |
+| POST | `/reports/found/:id/cancel` | Bearer (finder) | Cancel report |
+| POST | `/reports/found/:id/close` | Bearer (finder) | Close report |
+
+Public found responses expose only public-safe fields (`publicDescription`, title, category, location, etc.).  
+`description`, `privateDetails`, `identifier`, and `imageRef` are private verification fields.
+
 ### Checks
 
 ```bash

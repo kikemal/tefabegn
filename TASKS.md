@@ -206,6 +206,8 @@ A valid user can create, view, update, and appropriately close/cancel their own 
 
 ## TASK-006 — Found Item Reports
 
+**Status:** Completed
+
 ### Goal
 Allow authenticated users/staff to register found items.
 
