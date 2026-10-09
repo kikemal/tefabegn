@@ -326,6 +326,8 @@ Claimants must not be able to retrieve the hidden answers/private evidence befor
 
 ## TASK-010 — Ownership Verification
 
+**Status:** Completed
+
 ### Goal
 Build the verification service used by staff.
 

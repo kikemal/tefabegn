@@ -161,6 +161,18 @@ Responses include `suggestionOnly: true` and safe match reasons (no private evid
 Claimants never receive found-item private verification fields (`privateDetails`, `identifier`, private `imageRef`, internal `description`).  
 Duplicate active claims by the same user are rejected; competing claims are reported via `conflictingActiveClaims`.
 
+### Ownership verification (TASK-010)
+
+Staff-only. Verification **never auto-approves** a claim.
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| GET | `/verification/claims` | Bearer + staff | List claims awaiting verification |
+| GET | `/verification/claims/:claimId` | Bearer + staff | Verification package (public + private evidence separated) |
+| POST | `/verification/claims/:claimId/attempts` | Bearer + staff | Record assessment (`CONSISTENT` / `INCONSISTENT` / `UNCLEAR`) |
+
+Recording an attempt moves the claim to `UNDER_REVIEW` or `NEEDS_MORE_INFO` and writes a `VERIFICATION_RECORDED` audit event. Final approve/reject remains a later staff decision task.
+
 ### Checks
 
 ```bash
