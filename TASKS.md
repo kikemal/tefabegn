@@ -583,6 +583,8 @@ No critical authorization path relies on frontend behavior.
 
 ## TASK-017 — API Documentation
 
+**Status:** Completed
+
 ### Goal
 
 Document the backend API for later frontend integration.

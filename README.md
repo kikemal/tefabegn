@@ -24,6 +24,7 @@ Begin with `TASK-001` in `TASKS.md`.
 
 ## Documentation
 
+- `API.md` — **canonical backend API contract** for frontend integration (TASK-017)
 - `TASKS.md` — ordered implementation tasks
 - `RULES.md` — Cursor role, engineering and security rules
 - `GITHUB_WORKFLOW.md` — Git/GitHub ownership and workflow
@@ -34,6 +35,8 @@ Begin with `TASK-001` in `TASKS.md`.
 ## Backend (local)
 
 The API lives in `backend/`. Stack: Node.js, TypeScript, Express, PostgreSQL, Prisma.
+
+**API contract:** see [`API.md`](./API.md) for request/response shapes, auth, errors, and all endpoints. The sections below are a quick index.
 
 ### Prerequisites
 
