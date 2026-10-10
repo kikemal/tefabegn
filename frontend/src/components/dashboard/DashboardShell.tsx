@@ -7,6 +7,7 @@ import {
   LogOut,
   Menu,
   Search,
+  Shield,
   UserRound,
   X,
 } from "lucide-react";
@@ -20,7 +21,7 @@ import { LanguageSelector } from "../LanguageSelector";
 import { ThemeToggle } from "../ThemeToggle";
 import "../../styles/dashboard.css";
 
-const NAV = [
+const BASE_NAV = [
   { to: "/dashboard", key: "dashboard" as const, icon: LayoutDashboard, end: true },
   { to: "/browse", key: "browse" as const, icon: Search, end: false },
   { to: "/report", key: "report" as const, icon: FilePlus2, end: false },
@@ -28,7 +29,14 @@ const NAV = [
   { to: "/notifications", key: "notifications" as const, icon: Bell, end: false },
   { to: "/account", key: "account" as const, icon: UserRound, end: false },
   { to: "/help", key: "help" as const, icon: CircleHelp, end: false },
-];
+] as const;
+
+const STAFF_NAV_ITEM = {
+  to: "/staff",
+  key: "staff" as const,
+  icon: Shield,
+  end: false,
+};
 
 function initials(name: string | undefined, email: string | undefined) {
   const source = (name || email || "?").trim();
@@ -50,6 +58,14 @@ export function DashboardShell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const userMenuId = useId();
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const navItems =
+    user?.role === "STAFF"
+      ? [
+          ...BASE_NAV.slice(0, 5),
+          STAFF_NAV_ITEM,
+          ...BASE_NAV.slice(5),
+        ]
+      : [...BASE_NAV];
 
   const refreshUnread = useCallback(async () => {
     if (!accessToken) {
@@ -143,7 +159,7 @@ export function DashboardShell() {
         </Link>
 
         <nav className="dash-sidebar__nav">
-          {NAV.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink

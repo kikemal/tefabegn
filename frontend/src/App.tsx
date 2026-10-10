@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { RequireAuth } from "./auth/RequireAuth";
+import { RequireStaff } from "./auth/RequireStaff";
 import { SiteHeader } from "./components/SiteHeader";
 import { DashboardShell } from "./components/dashboard/DashboardShell";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
@@ -15,6 +16,8 @@ import { MyAccountPage } from "./pages/dashboard/MyAccountPage";
 import { MyReportsPage } from "./pages/dashboard/MyReportsPage";
 import { NotificationsPage } from "./pages/dashboard/NotificationsPage";
 import { ReportItemPage } from "./pages/dashboard/ReportItemPage";
+import { StaffClaimPage } from "./pages/dashboard/StaffClaimPage";
+import { StaffQueuePage } from "./pages/dashboard/StaffQueuePage";
 
 function PublicShell() {
   return (
@@ -55,6 +58,22 @@ export default function App() {
         <Route path="/account" element={<MyAccountPage />} />
         <Route path="/help" element={<HelpSupportPage />} />
         <Route path="/items/:type/:id" element={<ItemDetailPage />} />
+        <Route
+          path="/staff"
+          element={
+            <RequireStaff>
+              <StaffQueuePage />
+            </RequireStaff>
+          }
+        />
+        <Route
+          path="/staff/claims/:claimId"
+          element={
+            <RequireStaff>
+              <StaffClaimPage />
+            </RequireStaff>
+          }
+        />
       </Route>
 
       {/* Legacy placeholder paths from welcome CTAs */}
