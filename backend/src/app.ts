@@ -8,6 +8,7 @@ import { claimsRouter } from "./claims/routes";
 import { matchesRouter } from "./matching/routes";
 import { foundReportsRouter } from "./reports/found/routes";
 import { lostReportsRouter } from "./reports/lost/routes";
+import { publicReportsRouter } from "./reports/public/routes";
 import { searchReportsRouter } from "./reports/search/routes";
 import { notificationsRouter } from "./notifications/routes";
 import { healthRouter } from "./routes/health";
@@ -41,6 +42,8 @@ export function createApp() {
   app.use("/auth", authRateLimiter, authRouter);
   app.use("/users", usersRouter);
   app.use("/reports/lost", lostReportsRouter);
+  // Public feed must be registered under /reports/public (not /reports/found/:id).
+  app.use("/reports/public", publicReportsRouter);
   app.use("/reports/found", foundReportsRouter);
   app.use("/reports/search", searchReportsRouter);
   app.use("/matches", matchesRouter);

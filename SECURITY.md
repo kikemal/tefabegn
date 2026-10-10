@@ -9,7 +9,8 @@ Backend security review notes for ጠፋብኝ (Tefabign). Authorization is enfo
 | Authentication   | OK       | JWT access + hashed refresh tokens; disabled accounts rejected                   |
 | Authorization    | OK       | `requireAuth` / `requireStaff`; object ownership checks on reports/claims        |
 | Input validation | OK       | Zod on bodies/queries; JSON body limited to 100kb                                |
-| Rate limiting    | OK       | In-memory per-IP limiters on `/auth` and general API (disabled in test)          |
+| Rate limiting    | OK       | In-memory per-IP on `/auth`, general API, and public feed (60/15m); off in test   |
+| Public feed      | OK       | `GET /reports/public/recent-found` allowlists fields; no private/PII serialization |
 | Error handling   | OK       | Safe `AppError` payloads; no stack traces to clients; JSON/payload errors mapped |
 | Secret handling  | OK       | Env-only secrets; production rejects known insecure `JWT_SECRET` defaults        |
 | CORS             | OK       | `CORS_ORIGINS` allow-list; required in production                                |

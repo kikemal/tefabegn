@@ -55,7 +55,9 @@ export type TranslationTree = {
     viewDetails: string;
     locationPrefix: string;
     empty: string;
-    mockNote: string;
+    loading: string;
+    error: string;
+    retry: string;
   };
   placeholders: {
     browseTitle: string;
@@ -134,8 +136,9 @@ export const en: TranslationTree = {
     viewDetails: "Sign in to view items",
     locationPrefix: "Found near",
     empty: "No public found items to show yet.",
-    mockNote:
-      "Sample cards for layout only — not live campus data. A public found-items feed is not available without sign-in yet.",
+    loading: "Loading recently found items…",
+    error: "We couldn’t load recently found items. Check your connection and try again.",
+    retry: "Try again",
   },
   placeholders: {
     browseTitle: "Browse Items",

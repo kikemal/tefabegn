@@ -7,14 +7,31 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import heroCampus from "../assets/hero-campus.jpg";
-import { MOCK_RECENTLY_FOUND } from "../data/mockFoundItems";
+import {
+  categoryImageTone,
+  fetchRecentPublicFound,
+  type PublicRecentFoundReport,
+} from "../api/publicFeed";
 import { useLocale } from "../i18n/context";
 import "./WelcomePage.css";
 
-function formatDate(isoDate: string, locale: string) {
-  const date = new Date(`${isoDate}T12:00:00`);
+type FeedState =
+  | { status: "loading" }
+  | { status: "ready"; reports: PublicRecentFoundReport[] }
+  | { status: "empty" }
+  | { status: "error"; message: string };
+
+function formatFoundAt(iso: string | null, locale: string) {
+  if (!iso) {
+    return null;
+  }
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
   return new Intl.DateTimeFormat(locale === "am" ? "am-ET" : "en-GB", {
     day: "numeric",
     month: "short",
@@ -24,6 +41,39 @@ function formatDate(isoDate: string, locale: string) {
 
 export function WelcomePage() {
   const { t, locale } = useLocale();
+  const [feed, setFeed] = useState<FeedState>({ status: "loading" });
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setFeed({ status: "loading" });
+    fetchRecentPublicFound(8)
+      .then((data) => {
+        if (cancelled) {
+          return;
+        }
+        if (!data.reports.length) {
+          setFeed({ status: "empty" });
+          return;
+        }
+        setFeed({ status: "ready", reports: data.reports });
+      })
+      .catch((error: unknown) => {
+        if (cancelled) {
+          return;
+        }
+        const message =
+          error instanceof Error && error.message
+            ? error.message
+            : t.recent.error;
+        setFeed({ status: "error", message });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey, t.recent.error]);
 
   return (
     <div className="welcome">
@@ -126,32 +176,63 @@ export function WelcomePage() {
             </Link>
           </div>
 
-          <p className="recent-found__note">{t.recent.mockNote}</p>
+          {feed.status === "loading" ? (
+            <p className="recent-found__status" role="status" aria-live="polite">
+              {t.recent.loading}
+            </p>
+          ) : null}
 
-          <ul className="recent-found__grid">
-            {MOCK_RECENTLY_FOUND.map((item) => (
-              <li key={item.id}>
-                {/* Sample layout only — not live report IDs. Sign in to browse real items. */}
-                <Link
-                  to="/sign-in"
-                  state={{ from: "/browse" }}
-                  className="item-card"
-                >
-                  <div className={`item-card__media item-card__media--${item.imageTone}`}>
-                    <span className="item-card__badge" aria-hidden="true" />
-                  </div>
-                  <div className="item-card__body">
-                    <h3>{item.title}</h3>
-                    <p>
-                      {t.recent.locationPrefix} {item.location}
-                    </p>
-                    <time dateTime={item.foundAt}>{formatDate(item.foundAt, locale)}</time>
-                    <span className="item-card__cta">{t.recent.viewDetails}</span>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {feed.status === "empty" ? (
+            <p className="recent-found__status" role="status">
+              {t.recent.empty}
+            </p>
+          ) : null}
+
+          {feed.status === "error" ? (
+            <div className="recent-found__status recent-found__status--error" role="alert">
+              <p>{t.recent.error}</p>
+              <button
+                type="button"
+                className="recent-found__retry"
+                onClick={() => setReloadKey((key) => key + 1)}
+              >
+                {t.recent.retry}
+              </button>
+            </div>
+          ) : null}
+
+          {feed.status === "ready" ? (
+            <ul className="recent-found__grid">
+              {feed.reports.map((item) => {
+                const tone = categoryImageTone(item.category);
+                const foundLabel = formatFoundAt(item.foundAt, locale);
+                const detailFrom = `/items/found/${item.id}`;
+                return (
+                  <li key={item.id}>
+                    <Link
+                      to="/sign-in"
+                      state={{ from: detailFrom }}
+                      className="item-card"
+                    >
+                      <div className={`item-card__media item-card__media--${tone}`}>
+                        <span className="item-card__badge" aria-hidden="true" />
+                      </div>
+                      <div className="item-card__body">
+                        <h3>{item.title}</h3>
+                        <p>
+                          {t.recent.locationPrefix} {item.location}
+                        </p>
+                        {foundLabel && item.foundAt ? (
+                          <time dateTime={item.foundAt}>{foundLabel}</time>
+                        ) : null}
+                        <span className="item-card__cta">{t.recent.viewDetails}</span>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
         </div>
       </section>
     </div>

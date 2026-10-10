@@ -73,6 +73,16 @@ export const apiRateLimiter = createRateLimiter({
   keyPrefix: "api",
 });
 
+/**
+ * Anonymous public read endpoints (welcome feed, etc.).
+ * Tighter than the general API limiter to reduce scraping.
+ */
+export const publicFeedRateLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  keyPrefix: "public-feed",
+});
+
 /** Test helper — clears in-memory buckets. */
 export function resetRateLimitBuckets(): void {
   buckets.clear();

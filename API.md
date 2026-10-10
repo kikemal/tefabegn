@@ -319,7 +319,34 @@ Finder/staff → private; others → public-safe only.
 
 ---
 
-## 7. Search
+## 7. Public recent found (welcome)
+
+### `GET /reports/public/recent-found`
+
+**Auth:** none (anonymous read-only)  
+**Rate limit:** dedicated public-feed limiter (60 requests / 15 minutes / IP) in addition to the general API limiter.
+
+**Query:**
+
+| Param | Type | Notes |
+| --- | --- | --- |
+| `limit` | int 1–20 | default **8** |
+
+**Eligibility:** `type=FOUND` and `status` in `ACTIVE` \| `POSSIBLE_MATCH` only.
+
+**Ordering:** `foundAt` (`eventOccurredAt`) desc, then `createdAt` desc, then `id` desc.
+
+**Response `200` `data`:** `{ reports: PublicRecentFoundReport[] }`
+
+Allowlisted fields only:
+
+`id`, `type` (`"FOUND"`), `status`, `statusLabel`, `category`, `title`, `publicDescription`, `location`, `foundAt`, `shareRef`, `createdAt`
+
+Never includes `privateDetails`, `identifier`, `description`, `imageRef`, `reporterId`, `returnedAt`, `updatedAt`, evidence, or contact data.
+
+---
+
+## 8. Search
 
 ### `GET /reports/search`
 
@@ -344,7 +371,7 @@ No private verification fields.
 
 ---
 
-## 8. Matches
+## 9. Matches
 
 Matching produces **suggestions only** (`suggestionOnly: true`). Never auto-approves ownership.
 
@@ -380,7 +407,7 @@ Match object includes `score`, `status`, `statusLabel`, `reasons`, nested safe r
 
 ---
 
-## 9. Claims
+## 10. Claims
 
 ### `POST /claims`
 
@@ -429,7 +456,7 @@ Optional recipient acknowledgement. Does **not** set report to `RETURNED`.
 
 ---
 
-## 10. Ownership verification (staff)
+## 11. Ownership verification (staff)
 
 Verification **never** auto-approves.
 
@@ -483,7 +510,7 @@ Moves claim to `UNDER_REVIEW` or `NEEDS_MORE_INFO`. Writes `VERIFICATION_RECORDE
 
 ---
 
-## 11. Staff review
+## 12. Staff review
 
 All routes: **Bearer + staff**.
 
@@ -520,7 +547,7 @@ Audit: `HANDOVER_READY`.
 
 ---
 
-## 12. Handover and return
+## 13. Handover and return
 
 ### `POST /staff/reports/found/:foundReportId/confirm-return`
 
@@ -551,7 +578,7 @@ Ordinary users cannot mark return/close via staff routes.
 
 ---
 
-## 13. Notifications
+## 14. Notifications
 
 ### `GET /notifications`
 
@@ -577,7 +604,7 @@ Marks all own notifications read → `{ updated }`
 
 ---
 
-## 14. Audit history (staff)
+## 15. Audit history (staff)
 
 Append-only. No update/delete endpoints.
 
@@ -614,7 +641,7 @@ Claim events plus linked found-report events (deduplicated).
 
 ---
 
-## 15. Frontend integration notes
+## 16. Frontend integration notes
 
 1. Store access + refresh tokens securely; send Bearer access token on protected calls.
 2. On `401`, try `/auth/refresh` then retry once; on failure, force re-login.
@@ -627,7 +654,7 @@ Claim events plus linked found-report events (deduplicated).
 
 ---
 
-## 16. Related docs
+## 17. Related docs
 
 - `README.md` — local run + module index
 - `DATABASE.md` — schema / migrations

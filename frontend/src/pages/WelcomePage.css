@@ -245,10 +245,38 @@
   text-underline-offset: 0.2em;
 }
 
-.recent-found__note {
+.recent-found__status {
   margin: 0 0 1.25rem;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--color-text-muted);
+}
+
+.recent-found__status--error {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+  color: var(--color-text);
+}
+
+.recent-found__status--error p {
+  margin: 0;
+}
+
+.recent-found__retry {
+  appearance: none;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-card);
+  color: var(--color-text);
+  border-radius: var(--radius-sm, 0.4rem);
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.recent-found__retry:hover,
+.recent-found__retry:focus-visible {
+  border-color: var(--color-text);
 }
 
 .recent-found__grid {
