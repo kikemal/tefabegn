@@ -84,7 +84,7 @@ export function RegisterPage() {
         fullName: fullName.trim(),
       });
       setSession(session.user, session.tokens);
-      navigate("/my-reports", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.code === "EMAIL_IN_USE" || error.status === 409) {

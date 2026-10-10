@@ -50,9 +50,14 @@ Translations: `src/i18n/en.ts`, `src/i18n/am.ts`.
 | `/sign-in` | Login page (English-only glass card; wired to `POST /api/auth/login`) |
 | `/register` | Registration page (wired to `POST /api/auth/register`) |
 | `/forgot-password` | Info only — backend v1 has no password-reset API |
-| `/browse`, `/my-reports`, `/about` | Placeholder until integration |
-| `/reports/lost`, `/reports/found` | Placeholder reporting routes |
-| `/items/:id` | Placeholder public item detail |
+| `/dashboard` | Student dashboard (auth required) |
+| `/browse` | Browse/search public-safe reports (auth required) |
+| `/report` | Create lost/found report forms (auth required) |
+| `/my-reports` | Own lost/found reports (auth required) |
+| `/account` | Profile, language, theme, sign-out |
+| `/help` | Help & support |
+| `/items/:type/:id` | Report detail |
+| `/about` | Public about placeholder |
 
 Google sign-in is **not** shown: the backend has no OAuth/Google integration.
 

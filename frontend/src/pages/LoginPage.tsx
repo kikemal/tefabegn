@@ -66,7 +66,7 @@ export function LoginPage() {
     try {
       const session = await loginRequest(email.trim(), password);
       setSession(session.user, session.tokens);
-      navigate("/my-reports", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.code === "ACCOUNT_DISABLED") {

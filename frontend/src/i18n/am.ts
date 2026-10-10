@@ -1,3 +1,4 @@
+import { dashboardAm } from "./dashboard.am";
 import type { TranslationTree } from "./en";
 
 export const am = {
@@ -9,6 +10,7 @@ export const am = {
     wordmarkLatin: "TEFABIGN",
     descriptor: "የካምፓስ ጠፍቶ የተገኘ",
   },
+  dash: dashboardAm,
   nav: {
     home: "መነሻ",
     browse: "እቃዎችን አስስ",

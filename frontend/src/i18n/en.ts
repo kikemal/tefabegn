@@ -1,3 +1,5 @@
+import { dashboardEn, type DashboardCopy } from "./dashboard.en";
+
 export type TranslationTree = {
   meta: { siteTitle: string };
   brand: {
@@ -5,6 +7,7 @@ export type TranslationTree = {
     wordmarkLatin: string;
     descriptor: string;
   };
+  dash: DashboardCopy;
   nav: {
     home: string;
     browse: string;
@@ -82,6 +85,7 @@ export const en: TranslationTree = {
     wordmarkLatin: "TEFABIGN",
     descriptor: "Campus Lost & Found",
   },
+  dash: dashboardEn,
   nav: {
     home: "Home",
     browse: "Browse Items",
