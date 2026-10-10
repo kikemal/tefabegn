@@ -1,4 +1,5 @@
 import {
+  Bell,
   CircleHelp,
   ClipboardList,
   FilePlus2,
@@ -9,9 +10,10 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { logoutRequest } from "../../api/auth";
+import { getUnreadNotificationCount } from "../../api/notifications";
 import { useAuth } from "../../auth/AuthContext";
 import { useLocale } from "../../i18n/context";
 import { LanguageSelector } from "../LanguageSelector";
@@ -23,6 +25,7 @@ const NAV = [
   { to: "/browse", key: "browse" as const, icon: Search, end: false },
   { to: "/report", key: "report" as const, icon: FilePlus2, end: false },
   { to: "/my-reports", key: "myReports" as const, icon: ClipboardList, end: false },
+  { to: "/notifications", key: "notifications" as const, icon: Bell, end: false },
   { to: "/account", key: "account" as const, icon: UserRound, end: false },
   { to: "/help", key: "help" as const, icon: CircleHelp, end: false },
 ];
@@ -38,13 +41,28 @@ function initials(name: string | undefined, email: string | undefined) {
 
 export function DashboardShell() {
   const { t } = useLocale();
-  const { user, refreshToken, clearSession } = useAuth();
+  const { user, accessToken, refreshToken, clearSession } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
   const userMenuId = useId();
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  const refreshUnread = useCallback(async () => {
+    if (!accessToken) {
+      setUnreadCount(0);
+      return;
+    }
+    try {
+      const result = await getUnreadNotificationCount(accessToken);
+      setUnreadCount(result.unreadCount);
+    } catch {
+      // Keep last known count on transient failures.
+    }
+  }, [accessToken]);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-ui", "dashboard");
@@ -52,6 +70,14 @@ export function DashboardShell() {
       document.documentElement.removeAttribute("data-ui");
     };
   }, []);
+
+  useEffect(() => {
+    void refreshUnread();
+    const timer = window.setInterval(() => {
+      void refreshUnread();
+    }, 60000);
+    return () => window.clearInterval(timer);
+  }, [refreshUnread, location.pathname]);
 
   useEffect(() => {
     if (!userMenuOpen) {
@@ -166,6 +192,22 @@ export function DashboardShell() {
           </form>
 
           <div className="dash-topbar__actions">
+            <Link
+              to="/notifications"
+              className="dash-topbar__bell"
+              aria-label={
+                unreadCount > 0
+                  ? `${t.dash.topbar.notifications}, ${unreadCount} ${t.dash.topbar.unreadCount}`
+                  : t.dash.topbar.notifications
+              }
+            >
+              <Bell size={18} strokeWidth={1.75} aria-hidden="true" />
+              {unreadCount > 0 ? (
+                <span className="dash-topbar__bell-count" aria-hidden="true">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              ) : null}
+            </Link>
             <LanguageSelector />
             <ThemeToggle />
             <div className="dash-user" ref={userMenuRef}>

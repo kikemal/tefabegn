@@ -234,6 +234,117 @@
   gap: 0.45rem;
 }
 
+.dash-topbar__bell {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--dash-border);
+  background: var(--dash-card);
+  color: var(--dash-text);
+  text-decoration: none;
+}
+
+.dash-topbar__bell:hover {
+  background: var(--dash-bg-subtle);
+}
+
+.dash-topbar__bell-count {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.2rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: var(--color-forest);
+  color: var(--color-ivory);
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+.dash-notif-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dash-notif-toolbar__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dash-notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.dash-notif-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--dash-border);
+  background: var(--dash-card);
+}
+
+.dash-notif-item.is-unread {
+  border-color: color-mix(in srgb, var(--color-forest) 35%, var(--dash-border));
+  background: color-mix(in srgb, var(--color-forest) 6%, var(--dash-card));
+}
+
+.dash-notif-item__body {
+  display: grid;
+  gap: 0.35rem;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.dash-notif-item__body h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.dash-notif-item__body p {
+  margin: 0;
+}
+
+.dash-notif-item__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dash-notif-item__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--color-forest);
+  color: var(--color-ivory);
+}
+
+.dash-notif-item__badge.is-read {
+  background: var(--dash-bg-subtle);
+  color: var(--dash-text-muted);
+}
+
 .dash-topbar .theme-toggle,
 .dash-topbar .language-selector {
   color: var(--dash-text);

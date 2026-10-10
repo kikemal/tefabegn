@@ -13,6 +13,7 @@ import { HelpSupportPage } from "./pages/dashboard/HelpSupportPage";
 import { ItemDetailPage } from "./pages/dashboard/ItemDetailPage";
 import { MyAccountPage } from "./pages/dashboard/MyAccountPage";
 import { MyReportsPage } from "./pages/dashboard/MyReportsPage";
+import { NotificationsPage } from "./pages/dashboard/NotificationsPage";
 import { ReportItemPage } from "./pages/dashboard/ReportItemPage";
 
 function PublicShell() {
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/browse" element={<BrowseItemsPage />} />
         <Route path="/report" element={<ReportItemPage />} />
         <Route path="/my-reports" element={<MyReportsPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/account" element={<MyAccountPage />} />
         <Route path="/help" element={<HelpSupportPage />} />
         <Route path="/items/:type/:id" element={<ItemDetailPage />} />
