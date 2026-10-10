@@ -1,11 +1,6 @@
-import {
-  ClaimStatus,
-  ReportStatus,
-  ReportType,
-  type Claim,
-  type ItemReport,
-  type Prisma,
-} from "@prisma/client";
+import { ClaimStatus, ReportStatus, ReportType, type Claim, type ItemReport } from "@prisma/client";
+import { recordCaseEvent } from "../audit/service";
+import { CaseEventType } from "../audit/types";
 import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../db/prisma";
 import { notifyMoreInfoRequested } from "../notifications/emit";
@@ -20,24 +15,6 @@ import { toVerificationPackage } from "./mappers";
 import type { RecordVerificationAttemptInput } from "./validation";
 
 type ClaimWithFound = Claim & { foundReport: ItemReport };
-
-async function recordCaseEvent(input: {
-  reportId?: string;
-  claimId?: string;
-  actorId: string;
-  eventType: string;
-  metadata?: Prisma.InputJsonValue;
-}): Promise<void> {
-  await prisma.caseEvent.create({
-    data: {
-      reportId: input.reportId,
-      claimId: input.claimId,
-      actorId: input.actorId,
-      eventType: input.eventType,
-      metadata: input.metadata,
-    },
-  });
-}
 
 async function loadClaimForVerification(claimId: string): Promise<ClaimWithFound> {
   const claim = await prisma.claim.findUnique({
@@ -129,7 +106,7 @@ export async function recordVerificationAttempt(
     reportId: updated.foundReportId ?? undefined,
     claimId: updated.id,
     actorId: staff.id,
-    eventType: "VERIFICATION_RECORDED",
+    eventType: CaseEventType.VERIFICATION_RECORDED,
     metadata: {
       assessment: input.assessment,
       notes: input.notes,

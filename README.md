@@ -213,6 +213,17 @@ In-app notifications tied to business events. Text never includes private eviden
 
 Event types: `POSSIBLE_MATCH`, `CLAIM_SUBMITTED`, `MORE_INFO_REQUESTED`, `CLAIM_APPROVED`, `CLAIM_REJECTED`, `HANDOVER_READY`, `ITEM_RETURNED`, `CASE_CLOSED`.
 
+### Audit log / chain of custody (TASK-015)
+
+Append-only `CaseEvent` history. Staff can reconstruct a case timeline; there are no update/delete audit endpoints.
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| GET | `/staff/audit/reports/:reportId` | Bearer + staff | Chronological events for a report |
+| GET | `/staff/audit/claims/:claimId` | Bearer + staff | Chronological events for a claim (+ linked found report) |
+
+Responses include `eventType`, human-readable `eventLabel`, actor summary, sanitized metadata, and `createdAt`. Private evidence keys are stripped on write and read.
+
 ### Case status workflow (TASK-012)
 
 Status changes go through a shared state machine in `backend/src/workflow/`:

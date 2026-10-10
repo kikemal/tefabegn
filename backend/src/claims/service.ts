@@ -6,8 +6,9 @@ import {
   type Claim,
   type ItemReport,
   type Match,
-  type Prisma,
 } from "@prisma/client";
+import { recordCaseEvent } from "../audit/service";
+import { CaseEventType } from "../audit/types";
 import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../db/prisma";
 import type { AuthenticatedUser } from "../types/auth";
@@ -27,24 +28,6 @@ type ClaimWithRelations = Claim & {
   foundReport: ItemReport | null;
   match: Match | null;
 };
-
-async function recordCaseEvent(input: {
-  reportId?: string;
-  claimId?: string;
-  actorId: string;
-  eventType: string;
-  metadata?: Prisma.InputJsonValue;
-}): Promise<void> {
-  await prisma.caseEvent.create({
-    data: {
-      reportId: input.reportId,
-      claimId: input.claimId,
-      actorId: input.actorId,
-      eventType: input.eventType,
-      metadata: input.metadata,
-    },
-  });
-}
 
 function assertCanViewClaim(
   viewer: AuthenticatedUser,
@@ -171,7 +154,7 @@ export async function createClaim(user: AuthenticatedUser, input: CreateClaimInp
     reportId: foundReport.id,
     claimId: claim.id,
     actorId: user.id,
-    eventType: "CLAIM_SUBMITTED",
+    eventType: CaseEventType.CLAIM_SUBMITTED,
     metadata: {
       matchId: match?.id ?? null,
       conflictingActiveClaims: conflictingCount,
@@ -265,7 +248,7 @@ export async function withdrawClaim(user: AuthenticatedUser, claimId: string) {
     reportId: updated.foundReportId ?? undefined,
     claimId: updated.id,
     actorId: user.id,
-    eventType: "CLAIM_WITHDRAWN",
+    eventType: CaseEventType.CLAIM_WITHDRAWN,
   });
 
   return toClaimResponse(updated);

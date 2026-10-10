@@ -7,8 +7,9 @@ import {
   type Claim,
   type ItemReport,
   type Match,
-  type Prisma,
 } from "@prisma/client";
+import { recordCaseEvent } from "../audit/service";
+import { CaseEventType } from "../audit/types";
 import { toClaimResponse } from "../claims/mappers";
 import { prisma } from "../db/prisma";
 import { AppError } from "../middleware/errorHandler";
@@ -22,24 +23,6 @@ type ClaimWithRelations = Claim & {
   foundReport: ItemReport | null;
   match: (Match & { lostReport: ItemReport }) | null;
 };
-
-async function recordCaseEvent(input: {
-  reportId?: string;
-  claimId?: string;
-  actorId: string;
-  eventType: string;
-  metadata?: Prisma.InputJsonValue;
-}): Promise<void> {
-  await prisma.caseEvent.create({
-    data: {
-      reportId: input.reportId,
-      claimId: input.claimId,
-      actorId: input.actorId,
-      eventType: input.eventType,
-      metadata: input.metadata,
-    },
-  });
-}
 
 async function loadFoundOrThrow(foundReportId: string): Promise<ItemReport> {
   const report = await prisma.itemReport.findUnique({ where: { id: foundReportId } });
@@ -110,7 +93,7 @@ export async function confirmReturnByStaff(
     reportId: foundReportId,
     claimId: approvedClaim.id,
     actorId: staff.id,
-    eventType: "HANDOVER_COMPLETED",
+    eventType: CaseEventType.HANDOVER_COMPLETED,
     metadata: {
       notes: input.notes ?? null,
       returnedAt: returnedAt.toISOString(),
@@ -187,7 +170,7 @@ export async function confirmReceiptByClaimant(
     reportId: claim.foundReportId ?? undefined,
     claimId: claim.id,
     actorId: user.id,
-    eventType: "RETURN_CONFIRMED",
+    eventType: CaseEventType.RETURN_CONFIRMED,
     metadata: {
       notes: input.notes ?? null,
       recipientConfirmedAt: confirmedAt.toISOString(),
@@ -281,7 +264,7 @@ export async function closeCaseByStaff(
     reportId: foundReportId,
     claimId: closedClaim.id,
     actorId: staff.id,
-    eventType: "CASE_CLOSED",
+    eventType: CaseEventType.CASE_CLOSED,
     metadata: {
       notes: input.notes ?? null,
       returnedAt: report.returnedAt ? report.returnedAt.toISOString() : null,

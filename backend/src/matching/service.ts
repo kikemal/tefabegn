@@ -7,6 +7,8 @@ import {
   type Match,
   type Prisma,
 } from "@prisma/client";
+import { recordCaseEvent } from "../audit/service";
+import { CaseEventType } from "../audit/types";
 import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../db/prisma";
 import {
@@ -65,22 +67,6 @@ async function markPossibleMatch(report: ItemReport): Promise<void> {
   await prisma.itemReport.update({
     where: { id: report.id },
     data: { status: ReportStatus.POSSIBLE_MATCH },
-  });
-}
-
-async function recordCaseEvent(
-  reportId: string,
-  actorId: string,
-  eventType: string,
-  metadata?: Prisma.InputJsonValue,
-): Promise<void> {
-  await prisma.caseEvent.create({
-    data: {
-      reportId,
-      actorId,
-      eventType,
-      metadata,
-    },
   });
 }
 
@@ -160,15 +146,25 @@ async function upsertSuggestion(
   await markPossibleMatch(lost);
   await markPossibleMatch(found);
 
-  await recordCaseEvent(lost.id, actorId, "MATCH_SUGGESTED", {
-    matchId: match.id,
-    foundReportId: found.id,
-    score: scored.score,
+  await recordCaseEvent({
+    reportId: lost.id,
+    actorId,
+    eventType: CaseEventType.MATCH_SUGGESTED,
+    metadata: {
+      matchId: match.id,
+      foundReportId: found.id,
+      score: scored.score,
+    },
   });
-  await recordCaseEvent(found.id, actorId, "MATCH_SUGGESTED", {
-    matchId: match.id,
-    lostReportId: lost.id,
-    score: scored.score,
+  await recordCaseEvent({
+    reportId: found.id,
+    actorId,
+    eventType: CaseEventType.MATCH_SUGGESTED,
+    metadata: {
+      matchId: match.id,
+      lostReportId: lost.id,
+      score: scored.score,
+    },
   });
 
   // Notify only when a new suggestion is created (avoid spam on regenerate).

@@ -4,8 +4,9 @@ import {
   ReportStatus,
   ReportType,
   type ItemReport,
-  type Prisma,
 } from "@prisma/client";
+import { recordCaseEvent } from "../audit/service";
+import { CaseEventType } from "../audit/types";
 import { toClaimResponse } from "../claims/mappers";
 import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../db/prisma";
@@ -28,24 +29,6 @@ import {
   assertReportTransition,
 } from "../workflow";
 import type { ReadyForHandoverInput, StaffClaimDecisionInput } from "./validation";
-
-async function recordCaseEvent(input: {
-  reportId?: string;
-  claimId?: string;
-  actorId: string;
-  eventType: string;
-  metadata?: Prisma.InputJsonValue;
-}): Promise<void> {
-  await prisma.caseEvent.create({
-    data: {
-      reportId: input.reportId,
-      claimId: input.claimId,
-      actorId: input.actorId,
-      eventType: input.eventType,
-      metadata: input.metadata,
-    },
-  });
-}
 
 export async function listReportsForStaffReview() {
   const reports = await prisma.itemReport.findMany({
@@ -134,7 +117,7 @@ export async function decideClaim(
       reportId: updated.foundReportId ?? undefined,
       claimId: updated.id,
       actorId: staff.id,
-      eventType: "CLAIM_MORE_INFO_REQUESTED",
+      eventType: CaseEventType.CLAIM_MORE_INFO_REQUESTED,
       metadata: { notes: input.notes, decision: input.decision },
     });
 
@@ -180,7 +163,7 @@ export async function decideClaim(
       reportId: updated.foundReportId ?? undefined,
       claimId: updated.id,
       actorId: staff.id,
-      eventType: "CLAIM_REJECTED",
+      eventType: CaseEventType.CLAIM_REJECTED,
       metadata: { notes: input.notes, decision: input.decision },
     });
 
@@ -262,7 +245,7 @@ export async function decideClaim(
     reportId: updated.foundReportId ?? undefined,
     claimId: updated.id,
     actorId: staff.id,
-    eventType: "CLAIM_APPROVED",
+    eventType: CaseEventType.CLAIM_APPROVED,
     metadata: { notes: input.notes, decision: input.decision },
   });
 
@@ -325,7 +308,7 @@ export async function markFoundReadyForHandover(
     reportId: foundReportId,
     claimId: approvedClaim.id,
     actorId: staff.id,
-    eventType: "HANDOVER_READY",
+    eventType: CaseEventType.HANDOVER_READY,
     metadata: {
       notes: input.notes ?? null,
       publicSummary: toPublicFoundReport(updated),

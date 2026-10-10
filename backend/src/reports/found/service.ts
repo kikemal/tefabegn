@@ -1,5 +1,7 @@
 import { randomBytes } from "node:crypto";
-import { ReportStatus, ReportType, Role, type ItemReport, type Prisma } from "@prisma/client";
+import { ReportStatus, ReportType, Role, type ItemReport } from "@prisma/client";
+import { recordCaseEvent } from "../../audit/service";
+import { CaseEventType } from "../../audit/types";
 import { AppError } from "../../middleware/errorHandler";
 import { prisma } from "../../db/prisma";
 import type { AuthenticatedUser } from "../../types/auth";
@@ -19,22 +21,6 @@ import type { CreateFoundReportInput, UpdateFoundReportInput } from "./validatio
 
 function createShareRef(): string {
   return `FF-${randomBytes(4).toString("hex").toUpperCase()}`;
-}
-
-async function recordCaseEvent(
-  reportId: string,
-  actorId: string,
-  eventType: string,
-  metadata?: Prisma.InputJsonValue,
-): Promise<void> {
-  await prisma.caseEvent.create({
-    data: {
-      reportId,
-      actorId,
-      eventType,
-      metadata,
-    },
-  });
 }
 
 async function findFoundReportOrThrow(id: string): Promise<ItemReport> {
@@ -79,9 +65,14 @@ export async function createFoundReport(
     },
   });
 
-  await recordCaseEvent(report.id, user.id, "FOUND_REPORTED", {
-    category: report.category,
-    status: report.status,
+  await recordCaseEvent({
+    reportId: report.id,
+    actorId: user.id,
+    eventType: CaseEventType.FOUND_REPORTED,
+    metadata: {
+      category: report.category,
+      status: report.status,
+    },
   });
 
   return toOwnerFoundReport(report);
@@ -138,7 +129,11 @@ export async function updateFoundReport(
     },
   });
 
-  await recordCaseEvent(reportId, user.id, "FOUND_UPDATED");
+  await recordCaseEvent({
+    reportId,
+    actorId: user.id,
+    eventType: CaseEventType.FOUND_UPDATED,
+  });
   return toOwnerFoundReport(updated);
 }
 
@@ -162,7 +157,11 @@ export async function cancelFoundReport(
     where: { id: reportId },
     data: { status: ReportStatus.CANCELLED },
   });
-  await recordCaseEvent(reportId, user.id, "FOUND_CANCELLED");
+  await recordCaseEvent({
+    reportId,
+    actorId: user.id,
+    eventType: CaseEventType.FOUND_CANCELLED,
+  });
   return toOwnerFoundReport(updated);
 }
 
@@ -186,6 +185,10 @@ export async function closeFoundReport(
     where: { id: reportId },
     data: { status: ReportStatus.CLOSED },
   });
-  await recordCaseEvent(reportId, user.id, "FOUND_CLOSED");
+  await recordCaseEvent({
+    reportId,
+    actorId: user.id,
+    eventType: CaseEventType.FOUND_CLOSED,
+  });
   return toOwnerFoundReport(updated);
 }

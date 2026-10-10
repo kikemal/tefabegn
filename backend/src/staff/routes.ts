@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { ZodError } from "zod";
+import { getAuditHistoryForClaim, getAuditHistoryForReport } from "../audit/service";
 import { requireAuth, requireStaff } from "../middleware/auth";
 import { AppError } from "../middleware/errorHandler";
 import { ok } from "../types/api";
@@ -132,6 +133,32 @@ staffRouter.post("/reports/found/:foundReportId/close-case", async (req, res, ne
       next(validationError(error));
       return;
     }
+    next(error);
+  }
+});
+
+staffRouter.get("/audit/reports/:reportId", async (req, res, next) => {
+  try {
+    const reportId = req.params.reportId;
+    if (!reportId) {
+      throw new AppError(400, "VALIDATION_ERROR", "Report id is required");
+    }
+    const history = await getAuditHistoryForReport(reportId);
+    res.status(200).json(ok(history));
+  } catch (error) {
+    next(error);
+  }
+});
+
+staffRouter.get("/audit/claims/:claimId", async (req, res, next) => {
+  try {
+    const claimId = req.params.claimId;
+    if (!claimId) {
+      throw new AppError(400, "VALIDATION_ERROR", "Claim id is required");
+    }
+    const history = await getAuditHistoryForClaim(claimId);
+    res.status(200).json(ok(history));
+  } catch (error) {
     next(error);
   }
 });
