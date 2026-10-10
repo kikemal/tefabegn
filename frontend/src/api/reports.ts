@@ -143,9 +143,3 @@ export function createFoundReport(accessToken: string, body: CreateFoundInput) {
     body: JSON.stringify(body),
   });
 }
-
-export function listMyMatches(accessToken: string) {
-  return apiRequest<{ matches: Array<{ id: string; status: string }> }>("/matches", {
-    headers: authHeaders(accessToken),
-  });
-}
