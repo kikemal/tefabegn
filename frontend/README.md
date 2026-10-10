@@ -47,9 +47,14 @@ Translations: `src/i18n/en.ts`, `src/i18n/am.ts`.
 | Path | Status |
 | --- | --- |
 | `/` | Welcome page (implemented) |
-| `/browse`, `/my-reports`, `/about`, `/sign-in` | Placeholder until integration |
+| `/sign-in` | Login page (English-only glass card; wired to `POST /api/auth/login`) |
+| `/register` | Registration page (wired to `POST /api/auth/register`) |
+| `/forgot-password` | Info only — backend v1 has no password-reset API |
+| `/browse`, `/my-reports`, `/about` | Placeholder until integration |
 | `/reports/lost`, `/reports/found` | Placeholder reporting routes |
 | `/items/:id` | Placeholder public item detail |
+
+Google sign-in is **not** shown: the backend has no OAuth/Google integration.
 
 ## Recently found preview data
 
