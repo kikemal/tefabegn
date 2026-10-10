@@ -130,11 +130,12 @@ export const en: TranslationTree = {
   },
   recent: {
     eyebrow: "Recently found",
-    viewAll: "View all items",
-    viewDetails: "View details",
+    viewAll: "Sign in to browse items",
+    viewDetails: "Sign in to view items",
     locationPrefix: "Found near",
     empty: "No public found items to show yet.",
-    mockNote: "Preview items for layout — replace with live public search data.",
+    mockNote:
+      "Sample cards for layout only — not live campus data. A public found-items feed is not available without sign-in yet.",
   },
   placeholders: {
     browseTitle: "Browse Items",

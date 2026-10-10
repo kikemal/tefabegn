@@ -54,11 +54,12 @@ export const am = {
   },
   recent: {
     eyebrow: "በቅርቡ የተገኙ",
-    viewAll: "ሁሉንም እቃዎች ይመልከቱ",
-    viewDetails: "ዝርዝር ይመልከቱ",
+    viewAll: "እቃዎችን ለማስስ ይግቡ",
+    viewDetails: "እቃዎችን ለማየት ይግቡ",
     locationPrefix: "የተገኘበት",
     empty: "እስካሁን የሚታይ የተገኘ እቃ የለም።",
-    mockNote: "ለቅድመ እይታ ብቻ — በኋላ በቀጥታ ከህዝብ ፍለጋ መረጃ ይተካል።",
+    mockNote:
+      "ለቅድመ እይታ ብቻ — የቀጥታ የካምፓስ መረጃ አይደለም። ያለ መግባት የህዝብ የተገኙ እቃዎች ዝርዝር እስካሁን አይገኝም።",
   },
   placeholders: {
     browseTitle: "እቃዎችን አስስ",

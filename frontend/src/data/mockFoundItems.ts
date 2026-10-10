@@ -1,7 +1,8 @@
 /**
- * Development-only public-safe preview data for the welcome page.
- * Replace with API results from GET /reports/search?type=FOUND (public fields only).
- * Never include privateDetails, identifier, private imageRef, evidence, or contact info.
+ * Layout-only sample cards for the welcome page (not live campus data).
+ * Live browse requires auth today (GET /reports/search is Bearer-only).
+ * A future public feed must return public-safe fields only — never privateDetails,
+ * identifier, private imageRef, evidence, or contact info.
  */
 export type PublicFoundPreview = {
   id: string;

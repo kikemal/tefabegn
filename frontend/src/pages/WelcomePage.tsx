@@ -45,7 +45,11 @@ export function WelcomePage() {
           <p className="welcome-hero__subtitle">{t.hero.subtitle}</p>
 
           <div className="welcome-actions" role="group" aria-label={t.nav.primary}>
-            <Link to="/reports/lost" className="action-card action-card--lost">
+            <Link
+              to="/sign-in"
+              state={{ from: "/report?type=lost" }}
+              className="action-card action-card--lost"
+            >
               <span className="action-card__rings" aria-hidden="true" />
               <Search className="action-card__icon" strokeWidth={1.5} aria-hidden="true" />
               <span className="action-card__title">{t.actions.lostTitle}</span>
@@ -55,7 +59,11 @@ export function WelcomePage() {
               </span>
             </Link>
 
-            <Link to="/reports/found" className="action-card action-card--found">
+            <Link
+              to="/sign-in"
+              state={{ from: "/report?type=found" }}
+              className="action-card action-card--found"
+            >
               <span className="action-card__rings" aria-hidden="true" />
               <Package className="action-card__icon" strokeWidth={1.5} aria-hidden="true" />
               <span className="action-card__title">{t.actions.foundTitle}</span>
@@ -108,7 +116,11 @@ export function WelcomePage() {
               <span className="welcome-hero__eyebrow-rule" aria-hidden="true" />
               {t.recent.eyebrow}
             </h2>
-            <Link to="/browse" className="recent-found__view-all">
+            <Link
+              to="/sign-in"
+              state={{ from: "/browse" }}
+              className="recent-found__view-all"
+            >
               {t.recent.viewAll}
               <ArrowRight size={16} aria-hidden="true" />
             </Link>
@@ -119,7 +131,12 @@ export function WelcomePage() {
           <ul className="recent-found__grid">
             {MOCK_RECENTLY_FOUND.map((item) => (
               <li key={item.id}>
-                <Link to={`/items/${item.id}`} className="item-card">
+                {/* Sample layout only — not live report IDs. Sign in to browse real items. */}
+                <Link
+                  to="/sign-in"
+                  state={{ from: "/browse" }}
+                  className="item-card"
+                >
                   <div className={`item-card__media item-card__media--${item.imageTone}`}>
                     <span className="item-card__badge" aria-hidden="true" />
                   </div>
