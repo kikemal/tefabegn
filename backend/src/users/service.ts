@@ -54,12 +54,10 @@ export async function getProfileForViewer(
   viewer: AuthenticatedUser,
   targetUserId: string,
 ): Promise<PublicUser> {
-  if (viewer.id !== targetUserId && viewer.role !== Role.STAFF) {
-    throw new AppError(403, "FORBIDDEN", "You are not allowed to view this profile");
-  }
-
   const user = await prisma.user.findUnique({ where: { id: targetUserId } });
-  if (!user) {
+
+  // Uniform 404 for unauthorized cross-user reads reduces ID enumeration.
+  if (!user || (viewer.id !== targetUserId && viewer.role !== Role.STAFF)) {
     throw new AppError(404, "USER_NOT_FOUND", "User not found");
   }
 

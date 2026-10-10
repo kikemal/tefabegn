@@ -1,6 +1,9 @@
 import express from "express";
 import { authRouter } from "./auth/routes";
+import { corsMiddleware } from "./middleware/cors";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
+import { apiRateLimiter, authRateLimiter } from "./middleware/rateLimit";
+import { securityHeaders } from "./middleware/securityHeaders";
 import { claimsRouter } from "./claims/routes";
 import { matchesRouter } from "./matching/routes";
 import { foundReportsRouter } from "./reports/found/routes";
@@ -16,6 +19,11 @@ export function createApp() {
   const app = express();
 
   app.disable("x-powered-by");
+  app.set("trust proxy", 1);
+
+  app.use(securityHeaders);
+  app.use(corsMiddleware);
+  app.use(apiRateLimiter);
   app.use(express.json({ limit: "100kb" }));
 
   app.get("/", (_req, res) => {
@@ -30,7 +38,7 @@ export function createApp() {
   });
 
   app.use("/health", healthRouter);
-  app.use("/auth", authRouter);
+  app.use("/auth", authRateLimiter, authRouter);
   app.use("/users", usersRouter);
   app.use("/reports/lost", lostReportsRouter);
   app.use("/reports/found", foundReportsRouter);

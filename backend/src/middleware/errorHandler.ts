@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { fail } from "../types/api";
+import { logSafeError } from "./safeLog";
 
 export class AppError extends Error {
   readonly statusCode: number;
@@ -27,6 +28,23 @@ export function errorHandler(
     return;
   }
 
-  console.error("Unhandled error:", err);
+  // express.json() syntax errors
+  if (err instanceof SyntaxError) {
+    res.status(400).json(fail("VALIDATION_ERROR", "Invalid JSON body"));
+    return;
+  }
+
+  // Payload too large
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "type" in err &&
+    (err as { type?: string }).type === "entity.too.large"
+  ) {
+    res.status(413).json(fail("PAYLOAD_TOO_LARGE", "Request body is too large"));
+    return;
+  }
+
+  logSafeError("Unhandled error:", err);
   res.status(500).json(fail("INTERNAL_SERVER_ERROR", "An unexpected error occurred"));
 }

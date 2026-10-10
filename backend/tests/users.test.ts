@@ -103,8 +103,8 @@ describe("user profile module", () => {
       .get(`/users/${bob.userId}`)
       .set("Authorization", `Bearer ${alice.accessToken}`);
 
-    expect(response.status).toBe(403);
-    expect(response.body.error.code).toBe("FORBIDDEN");
+    expect(response.status).toBe(404);
+    expect(response.body.error.code).toBe("USER_NOT_FOUND");
   });
 
   it("allows a user to read their own profile by id", async () => {

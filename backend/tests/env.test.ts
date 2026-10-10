@@ -47,4 +47,34 @@ describe("loadEnv", () => {
   it("requires a sufficiently long JWT_SECRET", () => {
     expect(() => loadEnv({ DATABASE_URL: validDbUrl, JWT_SECRET: "short" })).toThrow(/JWT_SECRET/);
   });
+
+  it("parses CORS origins and rate-limit flag", () => {
+    const env = loadEnv({
+      DATABASE_URL: validDbUrl,
+      JWT_SECRET: validJwtSecret,
+      CORS_ORIGINS: "http://localhost:5173, https://campus.example",
+      RATE_LIMIT_ENABLED: "false",
+    });
+    expect(env.CORS_ORIGINS).toEqual(["http://localhost:5173", "https://campus.example"]);
+    expect(env.RATE_LIMIT_ENABLED).toBe(false);
+  });
+
+  it("rejects insecure defaults in production", () => {
+    expect(() =>
+      loadEnv({
+        NODE_ENV: "production",
+        DATABASE_URL: validDbUrl,
+        JWT_SECRET: "dev-only-change-me-to-a-long-random-secret",
+        CORS_ORIGINS: "https://campus.example",
+      }),
+    ).toThrow(/JWT_SECRET/);
+
+    expect(() =>
+      loadEnv({
+        NODE_ENV: "production",
+        DATABASE_URL: validDbUrl,
+        JWT_SECRET: "production-grade-secret-at-least-32-chars",
+      }),
+    ).toThrow(/CORS_ORIGINS/);
+  });
 });

@@ -56,12 +56,19 @@ export async function registerUser(input: RegisterInput): Promise<{
   return { user: toPublicUser(user), tokens };
 }
 
+/** Dummy bcrypt hash so missing users still pay verify cost (timing hardening). */
+const LOGIN_DUMMY_HASH = "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012345";
+
 export async function loginUser(input: LoginInput): Promise<{
   user: PublicUser;
   tokens: AuthTokenPair;
 }> {
   const user = await prisma.user.findUnique({ where: { email: input.email } });
-  const passwordValid = user ? await verifyPassword(input.password, user.passwordHash) : false;
+  // Always run a password compare to reduce account-enumeration timing signals.
+  const passwordValid = await verifyPassword(
+    input.password,
+    user?.passwordHash ?? LOGIN_DUMMY_HASH,
+  );
 
   if (!user || !passwordValid) {
     throw new AppError(401, "INVALID_CREDENTIALS", "Invalid email or password");
