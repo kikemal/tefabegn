@@ -455,6 +455,8 @@ At minimum consider:
 
 ## TASK-015 — Audit Log / Chain of Custody
 
+**Status:** Completed
+
 ### Goal
 Create a reliable history of important case events.
 

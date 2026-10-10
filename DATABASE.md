@@ -47,6 +47,12 @@ npm run db:studio     # optional Prisma Studio
 - `Claim` references a claimant `User`, optional `Match`, optional found `ItemReport`
 - `CaseEvent` optionally references report, claim, and actor
 
+## Audit / chain of custody (TASK-015)
+
+- `CaseEvent` is append-only at the application layer (create via `src/audit/service.ts` only).
+- Staff read APIs: `GET /staff/audit/reports/:reportId`, `GET /staff/audit/claims/:claimId`.
+- Metadata is sanitized to exclude private evidence fields.
+
 ## Return confirmation fields (TASK-013)
 
 - `ItemReport.returnedAt` — timestamp when staff recorded physical return

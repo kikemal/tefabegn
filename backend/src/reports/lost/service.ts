@@ -1,5 +1,7 @@
 import { randomBytes } from "node:crypto";
-import { ReportStatus, ReportType, Role, type ItemReport, type Prisma } from "@prisma/client";
+import { ReportStatus, ReportType, Role, type ItemReport } from "@prisma/client";
+import { recordCaseEvent } from "../../audit/service";
+import { CaseEventType } from "../../audit/types";
 import { AppError } from "../../middleware/errorHandler";
 import { prisma } from "../../db/prisma";
 import type { AuthenticatedUser } from "../../types/auth";
@@ -19,22 +21,6 @@ import type { CreateLostReportInput, UpdateLostReportInput } from "./validation"
 
 function createShareRef(): string {
   return `LF-${randomBytes(4).toString("hex").toUpperCase()}`;
-}
-
-async function recordCaseEvent(
-  reportId: string,
-  actorId: string,
-  eventType: string,
-  metadata?: Prisma.InputJsonValue,
-): Promise<void> {
-  await prisma.caseEvent.create({
-    data: {
-      reportId,
-      actorId,
-      eventType,
-      metadata,
-    },
-  });
 }
 
 async function findLostReportOrThrow(id: string): Promise<ItemReport> {
@@ -78,9 +64,14 @@ export async function createLostReport(
     },
   });
 
-  await recordCaseEvent(report.id, user.id, "LOST_REPORTED", {
-    category: report.category,
-    status: report.status,
+  await recordCaseEvent({
+    reportId: report.id,
+    actorId: user.id,
+    eventType: CaseEventType.LOST_REPORTED,
+    metadata: {
+      category: report.category,
+      status: report.status,
+    },
   });
 
   return toOwnerLostReport(report);
@@ -134,7 +125,11 @@ export async function updateLostReport(
     },
   });
 
-  await recordCaseEvent(reportId, user.id, "LOST_UPDATED");
+  await recordCaseEvent({
+    reportId,
+    actorId: user.id,
+    eventType: CaseEventType.LOST_UPDATED,
+  });
   return toOwnerLostReport(updated);
 }
 
@@ -158,7 +153,11 @@ export async function cancelLostReport(
     where: { id: reportId },
     data: { status: ReportStatus.CANCELLED },
   });
-  await recordCaseEvent(reportId, user.id, "LOST_CANCELLED");
+  await recordCaseEvent({
+    reportId,
+    actorId: user.id,
+    eventType: CaseEventType.LOST_CANCELLED,
+  });
   return toOwnerLostReport(updated);
 }
 
@@ -182,6 +181,10 @@ export async function closeLostReport(
     where: { id: reportId },
     data: { status: ReportStatus.CLOSED },
   });
-  await recordCaseEvent(reportId, user.id, "LOST_CLOSED");
+  await recordCaseEvent({
+    reportId,
+    actorId: user.id,
+    eventType: CaseEventType.LOST_CLOSED,
+  });
   return toOwnerLostReport(updated);
 }
