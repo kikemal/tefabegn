@@ -11,6 +11,7 @@ import {
 import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../db/prisma";
 import type { AuthenticatedUser } from "../types/auth";
+import { notifyClaimSubmitted } from "../notifications/emit";
 import {
   ACTIVE_CLAIM_STATUSES,
   CLAIMABLE_FOUND_STATUSES,
@@ -175,6 +176,13 @@ export async function createClaim(user: AuthenticatedUser, input: CreateClaimInp
       matchId: match?.id ?? null,
       conflictingActiveClaims: conflictingCount,
     },
+  });
+
+  await notifyClaimSubmitted({
+    claimId: claim.id,
+    claimantId: user.id,
+    foundReport,
+    lostReporterId: lostReport?.reporterId ?? null,
   });
 
   return {

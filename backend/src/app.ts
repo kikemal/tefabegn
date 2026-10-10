@@ -6,6 +6,7 @@ import { matchesRouter } from "./matching/routes";
 import { foundReportsRouter } from "./reports/found/routes";
 import { lostReportsRouter } from "./reports/lost/routes";
 import { searchReportsRouter } from "./reports/search/routes";
+import { notificationsRouter } from "./notifications/routes";
 import { healthRouter } from "./routes/health";
 import { staffRouter } from "./staff/routes";
 import { usersRouter } from "./users/routes";
@@ -38,6 +39,7 @@ export function createApp() {
   app.use("/claims", claimsRouter);
   app.use("/verification", verificationRouter);
   app.use("/staff", staffRouter);
+  app.use("/notifications", notificationsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

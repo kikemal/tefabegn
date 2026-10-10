@@ -5,8 +5,12 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     setupFiles: ["./tests/setup.ts"],
+    globalTeardown: ["./tests/globalTeardown.ts"],
     clearMocks: true,
-    testTimeout: 20_000,
-    hookTimeout: 20_000,
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
+    // Prisma query engine is unstable under multi-worker parallel file runs on Windows.
+    fileParallelism: false,
+    maxWorkers: 1,
   },
 });

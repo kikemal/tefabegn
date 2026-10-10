@@ -8,6 +8,7 @@ import {
 } from "@prisma/client";
 import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../db/prisma";
+import { notifyMoreInfoRequested } from "../notifications/emit";
 import type { AuthenticatedUser } from "../types/auth";
 import {
   REPORT_STATUSES_ENTERING_REVIEW,
@@ -137,6 +138,14 @@ export async function recordVerificationAttempt(
       autoApproved: false,
     },
   });
+
+  if (input.requestMoreInfo && updated.foundReport) {
+    await notifyMoreInfoRequested({
+      claimId: updated.id,
+      claimantId: updated.claimantId,
+      foundReport: updated.foundReport,
+    });
+  }
 
   return {
     verification: toVerificationPackage(updated as ClaimWithFound),
