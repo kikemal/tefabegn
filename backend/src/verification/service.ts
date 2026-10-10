@@ -42,6 +42,7 @@ export async function listClaimsForVerification() {
     },
     include: { foundReport: true },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    take: 100,
   });
 
   return claims.flatMap((claim) => {

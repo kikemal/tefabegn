@@ -74,6 +74,11 @@ Indexes are defined in `backend/prisma/schema.prisma` for common access patterns
 - notification user/read/created
 - case event report/claim/actor/eventType + createdAt
 
-## Out of scope for TASK-002
+## Integrity notes (post TASK-019)
 
-No authentication endpoints, report CRUD APIs, matching engine, claims workflow, or seed business data yet.
+Partial unique indexes on `Claim`:
+
+- one active (`SUBMITTED` / `NEEDS_MORE_INFO` / `UNDER_REVIEW`) claim per `(claimantId, foundReportId)`
+- one `APPROVED` claim per `foundReportId`
+
+List endpoints are capped (`take: 100` for most lists; audit history `take: 500`). Full cursor pagination remains a later enhancement if campus volume requires it.

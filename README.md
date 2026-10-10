@@ -32,6 +32,7 @@ Begin with `TASK-001` in `TASKS.md`.
 - `DATABASE.md` — database engine, schema entities, and migration commands
 - `SECURITY.md` — backend security hardening checklist (TASK-016)
 - `TESTING.md` — automated test suite map and how to run (TASK-018)
+- `INTEGRATION.md` — backend integration review checklist (TASK-019)
 
 ## Backend (local)
 
@@ -161,7 +162,7 @@ Responses include `suggestionOnly: true` and safe match reasons (no private evid
 | POST   | `/claims`              | Bearer            | Claim a found item and/or match          |
 | GET    | `/claims/mine`         | Bearer            | List own claims                          |
 | GET    | `/claims/:id`          | Bearer            | Claim detail (authorized parties)        |
-| POST   | `/claims/:id/withdraw` | Bearer (claimant) | Withdraw SUBMITTED/NEEDS_MORE_INFO claim |
+| POST   | `/claims/:id/withdraw` | Bearer (claimant or staff) | Withdraw SUBMITTED/NEEDS_MORE_INFO claim |
 
 Claimants never receive found-item private verification fields (`privateDetails`, `identifier`, private `imageRef`, internal `description`).  
 Duplicate active claims by the same user are rejected; competing claims are reported via `conflictingActiveClaims`.
@@ -200,7 +201,7 @@ Every decision writes a case/audit event (`CLAIM_APPROVED`, `CLAIM_REJECTED`, `C
 | Method | Path                                      | Auth                       | Purpose                                                     |
 | ------ | ----------------------------------------- | -------------------------- | ----------------------------------------------------------- |
 | POST   | `/staff/reports/found/:id/confirm-return` | Bearer + staff             | Record physical return (`returnedAt`, `HANDOVER_COMPLETED`) |
-| POST   | `/claims/:id/confirm-receipt`             | Bearer (approved claimant) | Optional recipient acknowledgement (`RETURN_CONFIRMED`)     |
+| POST   | `/claims/:id/confirm-receipt`             | Bearer (approved claimant or staff) | Optional recipient acknowledgement (`RETURN_CONFIRMED`)     |
 | POST   | `/staff/reports/found/:id/close-case`     | Bearer + staff             | Close case after return (`CASE_CLOSED`)                     |
 
 Ordinary users cannot mark an item returned. Recipient confirmation does not by itself set `RETURNED`.

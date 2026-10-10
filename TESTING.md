@@ -37,6 +37,7 @@ Notes:
 | Return confirmation | `handover.test.ts`, `lifecycle.test.ts` |
 | Notifications | `notifications.test.ts`, `lifecycle.test.ts` |
 | Audit events | `audit.test.ts`, `lifecycle.test.ts`, staff/verification tests |
+| Integration review (TASK-019) | `integration-review.test.ts`, `lifecycle.test.ts` |
 
 ## Suite layout
 

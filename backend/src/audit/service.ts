@@ -58,6 +58,7 @@ export async function getAuditHistoryForReport(reportId: string) {
       },
     },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    take: 500,
   });
 
   return {
@@ -82,6 +83,7 @@ export async function getAuditHistoryForClaim(claimId: string) {
       },
     },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    take: 500,
   });
 
   // Deduplicate if an event matches both claimId and reportId filters.

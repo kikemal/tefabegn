@@ -81,6 +81,7 @@ export async function listMyLostReports(userId: string): Promise<PrivateLostRepo
   const reports = await prisma.itemReport.findMany({
     where: { type: ReportType.LOST, reporterId: userId },
     orderBy: { createdAt: "desc" },
+    take: 100,
   });
   return reports.map(toOwnerLostReport);
 }
@@ -89,6 +90,7 @@ export async function listLostReportsForStaff(): Promise<PrivateLostReport[]> {
   const reports = await prisma.itemReport.findMany({
     where: { type: ReportType.LOST },
     orderBy: { createdAt: "desc" },
+    take: 100,
   });
   return reports.map(toOwnerLostReport);
 }

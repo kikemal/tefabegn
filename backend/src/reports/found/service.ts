@@ -82,6 +82,7 @@ export async function listMyFoundReports(userId: string): Promise<PrivateFoundRe
   const reports = await prisma.itemReport.findMany({
     where: { type: ReportType.FOUND, reporterId: userId },
     orderBy: { createdAt: "desc" },
+    take: 100,
   });
   return reports.map(toOwnerFoundReport);
 }
@@ -90,6 +91,7 @@ export async function listFoundReportsForStaff(): Promise<PrivateFoundReport[]> 
   const reports = await prisma.itemReport.findMany({
     where: { type: ReportType.FOUND },
     orderBy: { createdAt: "desc" },
+    take: 100,
   });
   return reports.map(toOwnerFoundReport);
 }

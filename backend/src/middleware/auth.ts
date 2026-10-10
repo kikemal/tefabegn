@@ -32,8 +32,11 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
     }
 
     const user = await prisma.user.findUnique({ where: { id: payload.sub } });
-    if (!user || user.status !== AccountStatus.ACTIVE) {
+    if (!user) {
       throw new AppError(401, "UNAUTHORIZED", "Authentication required");
+    }
+    if (user.status !== AccountStatus.ACTIVE) {
+      throw new AppError(403, "ACCOUNT_DISABLED", "Account is disabled");
     }
 
     req.user = {

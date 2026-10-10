@@ -54,6 +54,7 @@ Common codes:
 | `INVALID_REFRESH_TOKEN` | 401 | Refresh token invalid/expired/revoked |
 | `RATE_LIMITED` | 429 | Too many requests |
 | `PAYLOAD_TOO_LARGE` | 413 | Body exceeds 100kb |
+| `SERVICE_UNAVAILABLE` | 503 | Readiness check failed (DB unreachable) |
 | `INTERNAL_SERVER_ERROR` | 500 | Unexpected server error |
 
 ### 1.3 Roles
@@ -437,14 +438,29 @@ Lists claims in verifiable statuses with public found summary only.
 
 ### `GET /verification/claims/:claimId`
 
-**Auth:** Bearer + staff  
+**Auth:** Bearer + staff
 
-**Response `200` `data`:** verification package:
+**Response `200` `data`:**
 
-- `publicFound`
-- `privateFoundEvidence` (`description`, `privateDetails`, `identifier`, `imageRef`)
-- `claimantEvidence` (`message`, `evidence`, `proofRef`)
-- `autoApproval: false`
+```json
+{
+  "verification": {
+    "publicFound": {},
+    "privateFoundEvidence": {
+      "description": "...",
+      "privateDetails": "...",
+      "identifier": "...",
+      "imageRef": "..."
+    },
+    "claimantEvidence": {
+      "message": "...",
+      "evidence": "...",
+      "proofRef": "..."
+    },
+    "autoApproval": false
+  }
+}
+```
 
 ### `POST /verification/claims/:claimId/attempts`
 

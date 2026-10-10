@@ -116,7 +116,16 @@ async function upsertSuggestion(
         foundReportId: found.id,
       },
     },
+    include: {
+      lostReport: true,
+      foundReport: true,
+    },
   });
+
+  // Never rewind staff/terminal match decisions when regenerating suggestions.
+  if (existing && existing.status !== MatchStatus.SUGGESTED) {
+    return existing;
+  }
 
   const match = await prisma.match.upsert({
     where: {
@@ -135,7 +144,6 @@ async function upsertSuggestion(
     update: {
       score: scored.score,
       reasons,
-      status: MatchStatus.SUGGESTED,
     },
     include: {
       lostReport: true,
@@ -282,6 +290,7 @@ export async function listMatches(user: AuthenticatedUser, query: ListMatchesQue
     where,
     include: { lostReport: true, foundReport: true },
     orderBy: [{ score: "desc" }, { createdAt: "desc" }, { id: "desc" }],
+    take: 100,
   });
 
   return matches
