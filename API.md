@@ -2,6 +2,8 @@
 
 Canonical HTTP API contract for ጠፋብኝ (Tefabign) backend v1.
 
+**Freeze:** Backend v1 is frozen (TASK-020). See `BACKEND-V1.md`. Treat this document as the stable contract for frontend work.
+
 **Base URL (local):** `http://localhost:3000`  
 **Format:** JSON request/response  
 **Auth:** `Authorization: Bearer <accessToken>` unless noted

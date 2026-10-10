@@ -6,9 +6,9 @@
 
 **Product descriptor:** University Campus Lost & Found System
 
-**Current phase:** Backend only
+**Current phase:** Backend v1 frozen (TASK-020) — awaiting frontend UI/design
 
-**Future phase:** Frontend integration after the human developer provides the UI/design.
+**Future phase:** Frontend integration after the human developer provides the UI/design and explicitly starts that phase.
 
 ---
 

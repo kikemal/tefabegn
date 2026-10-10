@@ -661,6 +661,8 @@ Review all modules together.
 
 ## TASK-020 — Backend v1 Freeze
 
+**Status:** Completed
+
 ### Goal
 
 Declare backend v1 ready for frontend integration.

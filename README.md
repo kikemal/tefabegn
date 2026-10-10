@@ -4,7 +4,9 @@ University Campus Lost & Found System.
 
 ## Current Phase
 
-Backend-first development.
+**Backend v1 frozen** (TASK-020). Ready for frontend integration when the human developer supplies UI/design.
+
+See [`BACKEND-V1.md`](./BACKEND-V1.md) for the freeze declaration, env/migrate/test instructions, limitations, and frontend notes. Canonical API: [`API.md`](./API.md).
 
 ## Cursor Workflow
 
@@ -24,7 +26,9 @@ Begin with `TASK-001` in `TASKS.md`.
 
 ## Documentation
 
+- `BACKEND-V1.md` — **backend v1 freeze** (TASK-020): migrate/env/test, limitations, frontend notes
 - `API.md` — **canonical backend API contract** for frontend integration (TASK-017)
+- `CHANGELOG.md` — version history (`backend-1.0.0`)
 - `TASKS.md` — ordered implementation tasks
 - `RULES.md` — Cursor role, engineering and security rules
 - `GITHUB_WORKFLOW.md` — Git/GitHub ownership and workflow

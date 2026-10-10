@@ -36,4 +36,4 @@ Cross-module review before backend v1 freeze. Companion docs: `API.md`, `SECURIT
 
 ## Freeze gate
 
-Backend is ready for **TASK-020 — Backend v1 Freeze** after human review of this branch. Do not expand features until freeze notes and frontend integration kickoff.
+**Closed by TASK-020.** See `BACKEND-V1.md`. Do not expand backend features until the human developer starts the frontend integration phase.
