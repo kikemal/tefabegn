@@ -409,6 +409,8 @@ Invalid state transitions must be rejected by the backend.
 
 ## TASK-013 — Handover and Return Confirmation
 
+**Status:** Completed
+
 ### Goal
 Record the physical return of the item.
 

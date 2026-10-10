@@ -112,6 +112,8 @@ model ItemReport {
   imageRef          String?
   /// Shareable public reference code for the report.
   shareRef          String?      @unique
+  /// When staff recorded physical return to the claimant (TASK-013).
+  returnedAt        DateTime?
   reporterId        String
   reporter          User         @relation(fields: [reporterId], references: [id], onDelete: Restrict)
   createdAt         DateTime     @default(now())
@@ -160,10 +162,12 @@ model Claim {
   message       String?
   /// Claimant-supplied ownership evidence — private.
   evidence      String?
-  proofRef      String?
-  status        ClaimStatus @default(SUBMITTED)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  proofRef               String?
+  status                 ClaimStatus @default(SUBMITTED)
+  /// When the approved claimant confirmed receipt (optional; TASK-013).
+  recipientConfirmedAt   DateTime?
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
 
   claimant    User        @relation(fields: [claimantId], references: [id], onDelete: Restrict)
   foundReport ItemReport? @relation(fields: [foundReportId], references: [id], onDelete: Restrict)

@@ -13,6 +13,7 @@ export type PublicLostReport = {
   lostAt: string | null;
   shareRef: string | null;
   imageRef: string | null;
+  returnedAt: string | null;
   reporterId: string;
   createdAt: string;
   updatedAt: string;
@@ -35,6 +36,7 @@ export type PublicFoundReport = {
   location: string;
   foundAt: string | null;
   shareRef: string | null;
+  returnedAt: string | null;
   reporterId: string;
   createdAt: string;
   updatedAt: string;
@@ -61,6 +63,7 @@ export function toPublicLostReport(report: ItemReport): PublicLostReport {
     lostAt: report.eventOccurredAt ? report.eventOccurredAt.toISOString() : null,
     shareRef: report.shareRef,
     imageRef: report.imageRef,
+    returnedAt: report.returnedAt ? report.returnedAt.toISOString() : null,
     reporterId: report.reporterId,
     createdAt: report.createdAt.toISOString(),
     updatedAt: report.updatedAt.toISOString(),
@@ -87,6 +90,7 @@ export function toPublicFoundReport(report: ItemReport): PublicFoundReport {
     location: report.location,
     foundAt: report.eventOccurredAt ? report.eventOccurredAt.toISOString() : null,
     shareRef: report.shareRef,
+    returnedAt: report.returnedAt ? report.returnedAt.toISOString() : null,
     reporterId: report.reporterId,
     createdAt: report.createdAt.toISOString(),
     updatedAt: report.updatedAt.toISOString(),

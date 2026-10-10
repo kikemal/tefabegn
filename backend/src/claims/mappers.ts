@@ -22,6 +22,7 @@ export type ClaimResponse = {
   claimantId: string;
   foundReportId: string | null;
   matchId: string | null;
+  recipientConfirmedAt: string | null;
   createdAt: string;
   updatedAt: string;
   foundReport: PublicFoundReport | null;
@@ -44,6 +45,9 @@ export function toClaimResponse(claim: ClaimWithRelations): ClaimResponse {
     claimantId: claim.claimantId,
     foundReportId: claim.foundReportId,
     matchId: claim.matchId,
+    recipientConfirmedAt: claim.recipientConfirmedAt
+      ? claim.recipientConfirmedAt.toISOString()
+      : null,
     createdAt: claim.createdAt.toISOString(),
     updatedAt: claim.updatedAt.toISOString(),
     // Always public-safe found data for claim responses in TASK-009.

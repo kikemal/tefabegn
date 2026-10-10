@@ -28,6 +28,7 @@ describe("case status workflow", () => {
     expect(canTransitionReport(ReportStatus.CLAIM_PENDING, ReportStatus.UNDER_REVIEW)).toBe(true);
     expect(canTransitionReport(ReportStatus.UNDER_REVIEW, ReportStatus.APPROVED)).toBe(true);
     expect(canTransitionReport(ReportStatus.APPROVED, ReportStatus.HANDOVER_PENDING)).toBe(true);
+    expect(canTransitionReport(ReportStatus.APPROVED, ReportStatus.RETURNED)).toBe(true);
     expect(canTransitionReport(ReportStatus.HANDOVER_PENDING, ReportStatus.RETURNED)).toBe(true);
     expect(canTransitionReport(ReportStatus.RETURNED, ReportStatus.CLOSED)).toBe(true);
   });

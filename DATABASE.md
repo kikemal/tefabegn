@@ -47,6 +47,11 @@ npm run db:studio     # optional Prisma Studio
 - `Claim` references a claimant `User`, optional `Match`, optional found `ItemReport`
 - `CaseEvent` optionally references report, claim, and actor
 
+## Return confirmation fields (TASK-013)
+
+- `ItemReport.returnedAt` — timestamp when staff recorded physical return
+- `Claim.recipientConfirmedAt` — optional claimant receipt acknowledgement
+
 ## Privacy notes
 
 - `ItemReport.privateDetails`, `Claim.evidence`, and private image refs must never appear in public search/list APIs.
