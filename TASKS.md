@@ -610,6 +610,8 @@ Use the chosen API documentation standard consistently.
 
 ## TASK-018 — Automated Tests
 
+**Status:** Completed
+
 ### Goal
 
 Build a meaningful backend test suite.

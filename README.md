@@ -31,6 +31,7 @@ Begin with `TASK-001` in `TASKS.md`.
 - `REQUIREMENTS.md` — product requirements and agreed additions
 - `DATABASE.md` — database engine, schema entities, and migration commands
 - `SECURITY.md` — backend security hardening checklist (TASK-016)
+- `TESTING.md` — automated test suite map and how to run (TASK-018)
 
 ## Backend (local)
 
@@ -255,5 +256,7 @@ npm run lint
 npm run typecheck
 npm run format:check
 ```
+
+See [`TESTING.md`](./TESTING.md) for the coverage matrix (auth, privacy, workflow, notifications, audit) and the full-lifecycle integration test.
 
 Never commit `.env`, secrets, credentials, or private ownership evidence.
