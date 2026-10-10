@@ -68,16 +68,16 @@ export async function listMatchesForStaffReview() {
   }));
 }
 
-export async function listClaimsForStaffReview() {
+export async function listClaimsForStaffReview(staff: AuthenticatedUser) {
   const claims = await prisma.claim.findMany({
     include: { foundReport: true, match: true },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     take: 100,
   });
-  return claims.map((claim) => toClaimResponse(claim));
+  return claims.map((claim) => toClaimResponse(claim, staff));
 }
 
-export async function getStaffClaimReview(claimId: string) {
+export async function getStaffClaimReview(staff: AuthenticatedUser, claimId: string) {
   const claim = await prisma.claim.findUnique({
     where: { id: claimId },
     include: { foundReport: true, match: true },
@@ -88,7 +88,7 @@ export async function getStaffClaimReview(claimId: string) {
   }
 
   return {
-    claim: toClaimResponse(claim),
+    claim: toClaimResponse(claim, staff),
     verification: toVerificationPackage({
       ...claim,
       foundReport: claim.foundReport,
@@ -137,7 +137,7 @@ export async function decideClaim(
       });
     }
 
-    return { claim: toClaimResponse(updated), decision: input.decision };
+    return { claim: toClaimResponse(updated, staff), decision: input.decision };
   }
 
   if (input.decision === "REJECT") {
@@ -183,7 +183,7 @@ export async function decideClaim(
       });
     }
 
-    return { claim: toClaimResponse(updated), decision: input.decision };
+    return { claim: toClaimResponse(updated, staff), decision: input.decision };
   }
 
   // APPROVE
@@ -308,7 +308,7 @@ export async function decideClaim(
     }
   }
 
-  return { claim: toClaimResponse(updated), decision: input.decision };
+  return { claim: toClaimResponse(updated, staff), decision: input.decision };
 }
 
 export async function markFoundReadyForHandover(

@@ -10,7 +10,10 @@ export type ClaimMatchSummary = {
   foundReportId: string;
 };
 
-/** Claim payload — foundReport is public-safe only (no privateDetails/identifier). */
+/**
+ * Claim payload — foundReport is public-safe only (no privateDetails/identifier).
+ * message/evidence/proofRef are null for non-claimant, non-staff viewers (e.g. finders).
+ */
 export type Claim = {
   id: string;
   status: string;

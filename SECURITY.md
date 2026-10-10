@@ -15,7 +15,7 @@ Backend security review notes for ጠፋብኝ (Tefabign). Authorization is enfo
 | Secret handling  | OK       | Env-only secrets; production rejects known insecure `JWT_SECRET` defaults        |
 | CORS             | OK       | `CORS_ORIGINS` allow-list; required in production                                |
 | File uploads     | N/A      | Not implemented in backend v1 (image refs are strings only)                      |
-| Private evidence | OK       | Excluded from public search/claim/notification/audit metadata                    |
+| Private evidence | OK       | Found private fields excluded from public/claim/notification/audit surfaces; claimant `message`/`evidence`/`proofRef` only for claimant or staff (finders get claim status/summary with those fields null) |
 | ID enumeration   | Hardened | Cross-user profile reads return uniform `404 USER_NOT_FOUND`                     |
 | Ownership checks | OK       | Report/claim/match services enforce owner or staff                               |
 | Logging          | Hardened | Unhandled errors logged via redacting helper                                     |

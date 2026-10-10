@@ -431,14 +431,25 @@ Require `foundReportId` and/or `matchId`.
 
 Claim responses embed **public** found report only (never found private evidence).
 
+**Claimant private fields** (`message`, `evidence`, `proofRef`) are viewer-scoped:
+
+| Viewer | Sees claimant `message` / `evidence` / `proofRef` |
+| --- | --- |
+| Claimant (own claim) | Yes |
+| Staff | Yes |
+| Found-item reporter | No (null) — status + public summary only |
+| Related lost reporter (via match), if not the claimant | No (null) |
+| Anyone else | `403 FORBIDDEN` |
+
 ### `GET /claims/mine`
 
-**Auth:** Bearer → own claims
+**Auth:** Bearer → own claims (includes the claimant’s own evidence fields)
 
 ### `GET /claims/:id`
 
 **Auth:** Bearer  
-Allowed: claimant, found reporter, related lost reporter (via match), or staff.
+Allowed: claimant, found reporter, related lost reporter (via match), or staff.  
+Private claimant fields follow the viewer-scoped table above.
 
 ### `POST /claims/:id/withdraw`
 

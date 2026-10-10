@@ -31,7 +31,7 @@ claimsRouter.post("/", requireAuth, async (req, res, next) => {
 
 claimsRouter.get("/mine", requireAuth, async (req, res, next) => {
   try {
-    const claims = await listMyClaims(req.user!.id);
+    const claims = await listMyClaims(req.user!);
     res.status(200).json(ok({ claims }));
   } catch (error) {
     next(error);

@@ -43,9 +43,9 @@ staffRouter.get("/matches", async (_req, res, next) => {
   }
 });
 
-staffRouter.get("/claims", async (_req, res, next) => {
+staffRouter.get("/claims", async (req, res, next) => {
   try {
-    const claims = await listClaimsForStaffReview();
+    const claims = await listClaimsForStaffReview(req.user!);
     res.status(200).json(ok({ claims }));
   } catch (error) {
     next(error);
@@ -58,7 +58,7 @@ staffRouter.get("/claims/:claimId", async (req, res, next) => {
     if (!claimId) {
       throw new AppError(400, "VALIDATION_ERROR", "Claim id is required");
     }
-    const review = await getStaffClaimReview(claimId);
+    const review = await getStaffClaimReview(req.user!, claimId);
     res.status(200).json(ok(review));
   } catch (error) {
     next(error);

@@ -2,6 +2,7 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "../src/app";
 import { disconnectDatabase, prisma } from "../src/db/prisma";
+import { createStaffToken } from "./helpers";
 
 const app = createApp();
 
@@ -226,5 +227,87 @@ describe("claims", () => {
       .set("Authorization", `Bearer ${owner.accessToken}`);
     expect(withdrawn.status).toBe(200);
     expect(withdrawn.body.data.claim.status).toBe("WITHDRAWN");
+  });
+
+  it("redacts claimant private fields for the finder while claimant and staff retain them", async () => {
+    const finder = await register("priv-finder");
+    const claimant = await register("priv-claimant");
+    const stranger = await register("priv-stranger");
+    const staffToken = await createStaffToken(app, "priv-staff");
+    const marker = `PRV-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const secretMessage = `${marker}-CLAIM-MESSAGE-SECRET`;
+    const secretEvidence = `${marker}-CLAIM-EVIDENCE-SECRET`;
+    const secretProof = `${marker}-CLAIM-PROOF-SECRET`;
+
+    const found = await request(app)
+      .post("/reports/found")
+      .set("Authorization", `Bearer ${finder.accessToken}`)
+      .send({
+        category: "bags",
+        title: `${marker} bag`,
+        description: "internal",
+        publicDescription: "Blue bag",
+        location: "Lobby",
+        foundAt: "2026-10-08T12:00:00.000Z",
+      });
+
+    const created = await request(app)
+      .post("/claims")
+      .set("Authorization", `Bearer ${claimant.accessToken}`)
+      .send({
+        foundReportId: found.body.data.report.id,
+        message: secretMessage,
+        evidence: secretEvidence,
+        proofRef: secretProof,
+      });
+    expect(created.status).toBe(201);
+    expect(created.body.data.claim.message).toBe(secretMessage);
+    expect(created.body.data.claim.evidence).toBe(secretEvidence);
+    expect(created.body.data.claim.proofRef).toBe(secretProof);
+
+    const claimId = created.body.data.claim.id as string;
+
+    const asClaimant = await request(app)
+      .get(`/claims/${claimId}`)
+      .set("Authorization", `Bearer ${claimant.accessToken}`);
+    expect(asClaimant.status).toBe(200);
+    expect(asClaimant.body.data.claim.message).toBe(secretMessage);
+    expect(asClaimant.body.data.claim.evidence).toBe(secretEvidence);
+    expect(asClaimant.body.data.claim.proofRef).toBe(secretProof);
+
+    const asFinder = await request(app)
+      .get(`/claims/${claimId}`)
+      .set("Authorization", `Bearer ${finder.accessToken}`);
+    expect(asFinder.status).toBe(200);
+    expect(asFinder.body.data.claim.status).toBe("SUBMITTED");
+    expect(asFinder.body.data.claim.id).toBe(claimId);
+    expect(asFinder.body.data.claim.foundReportId).toBe(found.body.data.report.id);
+    expect(asFinder.body.data.claim.message).toBeNull();
+    expect(asFinder.body.data.claim.evidence).toBeNull();
+    expect(asFinder.body.data.claim.proofRef).toBeNull();
+    const finderBody = JSON.stringify(asFinder.body);
+    expect(finderBody).not.toContain(secretMessage);
+    expect(finderBody).not.toContain(secretEvidence);
+    expect(finderBody).not.toContain(secretProof);
+
+    const asStaff = await request(app)
+      .get(`/claims/${claimId}`)
+      .set("Authorization", `Bearer ${staffToken}`);
+    expect(asStaff.status).toBe(200);
+    expect(asStaff.body.data.claim.evidence).toBe(secretEvidence);
+    expect(asStaff.body.data.claim.message).toBe(secretMessage);
+    expect(asStaff.body.data.claim.proofRef).toBe(secretProof);
+
+    const staffReview = await request(app)
+      .get(`/staff/claims/${claimId}`)
+      .set("Authorization", `Bearer ${staffToken}`);
+    expect(staffReview.status).toBe(200);
+    expect(staffReview.body.data.claim.evidence).toBe(secretEvidence);
+    expect(staffReview.body.data.verification.claimantEvidence.evidence).toBe(secretEvidence);
+
+    const asStranger = await request(app)
+      .get(`/claims/${claimId}`)
+      .set("Authorization", `Bearer ${stranger.accessToken}`);
+    expect(asStranger.status).toBe(403);
   });
 });

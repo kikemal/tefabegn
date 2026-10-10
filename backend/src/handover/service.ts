@@ -154,7 +154,7 @@ export async function confirmReceiptByClaimant(
 
   if (claim.recipientConfirmedAt) {
     return {
-      claim: toClaimResponse(claim),
+      claim: toClaimResponse(claim, user),
       alreadyConfirmed: true as const,
     };
   }
@@ -179,7 +179,7 @@ export async function confirmReceiptByClaimant(
   });
 
   return {
-    claim: toClaimResponse(updated),
+    claim: toClaimResponse(updated, user),
     alreadyConfirmed: false as const,
   };
 }
@@ -285,6 +285,6 @@ export async function closeCaseByStaff(
     report: toOwnerFoundReport(closedFound),
     lostReport:
       closedLost && closedLost.type === ReportType.LOST ? toOwnerLostReport(closedLost) : null,
-    claim: toClaimResponse(closedClaim),
+    claim: toClaimResponse(closedClaim, staff),
   };
 }

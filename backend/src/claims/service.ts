@@ -235,19 +235,19 @@ export async function createClaim(user: AuthenticatedUser, input: CreateClaimInp
   });
 
   return {
-    claim: toClaimResponse(claim),
+    claim: toClaimResponse(claim, user),
     conflictingActiveClaims: conflictingCount,
   };
 }
 
-export async function listMyClaims(userId: string) {
+export async function listMyClaims(user: AuthenticatedUser) {
   const claims = await prisma.claim.findMany({
-    where: { claimantId: userId },
+    where: { claimantId: user.id },
     include: { foundReport: true, match: true },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: 100,
   });
-  return claims.map((claim) => toClaimResponse(claim));
+  return claims.map((claim) => toClaimResponse(claim, user));
 }
 
 export async function getClaimById(viewer: AuthenticatedUser, claimId: string) {
@@ -284,7 +284,7 @@ export async function getClaimById(viewer: AuthenticatedUser, claimId: string) {
       : null,
   };
 
-  return toClaimResponse(responseSource);
+  return toClaimResponse(responseSource, viewer);
 }
 
 export async function withdrawClaim(user: AuthenticatedUser, claimId: string) {
@@ -354,5 +354,5 @@ export async function withdrawClaim(user: AuthenticatedUser, claimId: string) {
     eventType: CaseEventType.CLAIM_WITHDRAWN,
   });
 
-  return toClaimResponse(updated);
+  return toClaimResponse(updated, user);
 }

@@ -10,7 +10,7 @@ import { registerUser, uniqueMarker } from "./helpers";
 const app = createApp();
 
 /** Far-future timestamps so this suite's rows win `foundAt` ordering against shared DB data. */
-const FAR_FUTURE = "2099-06-15T12:00:00.000Z";
+const FAR_FUTURE = "2101-06-15T12:00:00.000Z";
 
 const FORBIDDEN_KEYS = [
   "description",
@@ -79,7 +79,7 @@ describe("GET /reports/public/recent-found", () => {
     for (let i = 0; i < 10; i += 1) {
       await createFound({
         title: `${marker} limit-${i}`,
-        foundAt: new Date(Date.UTC(2099, 5, 1 + i, 12)).toISOString(),
+        foundAt: new Date(Date.UTC(2101, 5, 1 + i, 12)).toISOString(),
       });
     }
 
@@ -141,23 +141,23 @@ describe("GET /reports/public/recent-found", () => {
   });
 
   it("orders by foundAt descending, then createdAt descending", async () => {
-    // Use 2100 dates so these four always outrank other shared-DB fixtures (incl. 2099 suite data).
+    // Use 2102 dates so these four always outrank other shared-DB fixtures.
     const olderFound = await createFound({
       title: `${marker} order-older-found`,
-      foundAt: "2100-10-01T10:00:00.000Z",
+      foundAt: "2102-10-01T10:00:00.000Z",
     });
     const newerFound = await createFound({
       title: `${marker} order-newer-found`,
-      foundAt: "2100-12-01T10:00:00.000Z",
+      foundAt: "2102-12-01T10:00:00.000Z",
     });
     const sameFoundEarlier = await createFound({
       title: `${marker} order-same-a`,
-      foundAt: "2100-11-01T10:00:00.000Z",
+      foundAt: "2102-11-01T10:00:00.000Z",
     });
     await new Promise((resolve) => setTimeout(resolve, 25));
     const sameFoundLater = await createFound({
       title: `${marker} order-same-b`,
-      foundAt: "2100-11-01T10:00:00.000Z",
+      foundAt: "2102-11-01T10:00:00.000Z",
     });
 
     const response = await request(app).get("/reports/public/recent-found").query({ limit: 20 });
@@ -177,6 +177,7 @@ describe("GET /reports/public/recent-found", () => {
   it("returns only the allowlisted public fields and omits private data", async () => {
     await createFound({
       title: `${marker} allowlist`,
+      foundAt: "2103-01-01T12:00:00.000Z",
       description: `NEVER_LEAK_DESC_${secretMarker}`,
       privateDetails: `NEVER_LEAK_PRIVATE_${secretMarker}`,
       identifier: `NEVER_LEAK_ID_${marker}`,

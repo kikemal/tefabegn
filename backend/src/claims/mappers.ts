@@ -1,4 +1,4 @@
-import type { Claim, ItemReport, Match } from "@prisma/client";
+import { Role, type Claim, type ItemReport, type Match } from "@prisma/client";
 import { toPublicFoundReport, type PublicFoundReport } from "../reports/mappers";
 import { claimStatusLabel, matchStatusLabel } from "../workflow";
 
@@ -15,8 +15,11 @@ export type ClaimResponse = {
   id: string;
   status: Claim["status"];
   statusLabel: string;
+  /**
+   * Claimant private fields. Populated only for the claimant or staff.
+   * Found reporters and other authorized summary viewers receive null.
+   */
   message: string | null;
-  /** Claimant's own submitted evidence — never staff/found hidden answers. */
   evidence: string | null;
   proofRef: string | null;
   claimantId: string;
@@ -34,14 +37,39 @@ type ClaimWithRelations = Claim & {
   match: Match | null;
 };
 
-export function toClaimResponse(claim: ClaimWithRelations): ClaimResponse {
+export type ClaimResponseViewer = {
+  id: string;
+  role: Role;
+};
+
+/** Claimant + staff may see submitted ownership evidence; peers (e.g. finders) may not. */
+export function viewerMaySeeClaimantPrivateFields(
+  viewer: ClaimResponseViewer,
+  claim: { claimantId: string },
+): boolean {
+  if (viewer.role === Role.STAFF) {
+    return true;
+  }
+  return viewer.id === claim.claimantId;
+}
+
+/**
+ * Serialize a claim for a specific viewer.
+ * Always embeds public-safe found data only (never found private evidence).
+ */
+export function toClaimResponse(
+  claim: ClaimWithRelations,
+  viewer: ClaimResponseViewer,
+): ClaimResponse {
+  const includePrivate = viewerMaySeeClaimantPrivateFields(viewer, claim);
+
   return {
     id: claim.id,
     status: claim.status,
     statusLabel: claimStatusLabel(claim.status),
-    message: claim.message,
-    evidence: claim.evidence,
-    proofRef: claim.proofRef,
+    message: includePrivate ? claim.message : null,
+    evidence: includePrivate ? claim.evidence : null,
+    proofRef: includePrivate ? claim.proofRef : null,
     claimantId: claim.claimantId,
     foundReportId: claim.foundReportId,
     matchId: claim.matchId,
@@ -50,8 +78,6 @@ export function toClaimResponse(claim: ClaimWithRelations): ClaimResponse {
       : null,
     createdAt: claim.createdAt.toISOString(),
     updatedAt: claim.updatedAt.toISOString(),
-    // Always public-safe found data for claim responses in TASK-009.
-    // Claimants must not retrieve hidden found-item verification answers.
     foundReport: claim.foundReport ? toPublicFoundReport(claim.foundReport) : null,
     match: claim.match
       ? {
