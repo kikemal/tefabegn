@@ -15,7 +15,7 @@ The human developer is the sole:
 
 ## Current Mission
 
-Backend v1 is **frozen** (`BACKEND-V1.md`, TASK-020). Do not expand backend features until the human developer supplies UI/design and explicitly starts frontend integration.
+Backend v1 is **frozen** (`BACKEND-V1.md`, TASK-020). Frontend welcome UI is in `frontend/`. Do not expand backend features or unrelated UI until the human developer explicitly requests it.
 
 Until then: only human-authorized contract-preserving fixes, documentation, or explicitly requested tasks.
 

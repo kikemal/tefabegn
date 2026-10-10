@@ -4,9 +4,19 @@ University Campus Lost & Found System.
 
 ## Current Phase
 
-**Backend v1 frozen** (TASK-020). Ready for frontend integration when the human developer supplies UI/design.
+**Backend v1 frozen** (TASK-020). **Welcome page UI** lives in `frontend/` (Vite + React).
 
 See [`BACKEND-V1.md`](./BACKEND-V1.md) for the freeze declaration, env/migrate/test instructions, limitations, and frontend notes. Canonical API: [`API.md`](./API.md).
+
+### Frontend (welcome page)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Default: `http://localhost:5173` — see [`frontend/README.md`](./frontend/README.md).
 
 ## Cursor Workflow
 

@@ -1,0 +1,51 @@
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--color-forest);
+  min-width: 0;
+}
+
+.brand-logo__mark {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+
+.brand-logo__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  min-width: 0;
+}
+
+.brand-logo__amharic {
+  font-family: var(--font-ethiopic);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+.brand-logo__latin {
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+
+.brand-logo__descriptor {
+  display: none;
+  margin-left: 0.35rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid color-mix(in srgb, var(--color-forest) 22%, transparent);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--color-forest-muted);
+  white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+  .brand-logo__descriptor {
+    display: inline;
+  }
+}

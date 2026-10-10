@@ -1,0 +1,404 @@
+.welcome {
+  background: var(--color-ivory);
+}
+
+.welcome-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: min(92vh, 56rem);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.welcome-hero__media {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.welcome-hero__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 65% center;
+}
+
+.welcome-hero__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--color-ivory) 88%, transparent) 0%,
+      color-mix(in srgb, var(--color-ivory) 72%, transparent) 38%,
+      color-mix(in srgb, var(--color-ivory) 18%, transparent) 68%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-ivory) 35%, transparent) 0%,
+      transparent 28%,
+      color-mix(in srgb, var(--color-ivory) 55%, transparent) 100%
+    );
+}
+
+.welcome-hero__content {
+  width: min(100%, var(--content-max));
+  margin: 0 auto;
+  padding: calc(var(--header-height) + 1.5rem) 1.25rem 2.5rem;
+}
+
+.welcome-hero__eyebrow,
+.recent-found__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-forest);
+}
+
+.welcome-hero__eyebrow-rule {
+  width: 1.5rem;
+  height: 2px;
+  background: var(--color-forest);
+  border-radius: 999px;
+}
+
+.welcome-hero__title {
+  margin: 0;
+  max-width: 14ch;
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  color: var(--color-forest);
+}
+
+.welcome-hero__title span {
+  display: block;
+}
+
+.welcome-hero__subtitle {
+  margin: 1.1rem 0 0;
+  max-width: 34rem;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  color: var(--color-forest-soft);
+}
+
+.welcome-actions {
+  margin-top: 2rem;
+  display: grid;
+  gap: 1rem;
+  max-width: 42rem;
+}
+
+.action-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+  min-height: 10.5rem;
+  padding: 1.35rem 1.35rem 1.2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.action-card:hover,
+.action-card:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-soft), var(--shadow-card);
+}
+
+.action-card__rings {
+  position: absolute;
+  inset: -40% -10% auto auto;
+  width: 14rem;
+  height: 14rem;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  pointer-events: none;
+}
+
+.action-card__rings::before,
+.action-card__rings::after {
+  content: "";
+  position: absolute;
+  inset: 1.4rem;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.action-card__rings::after {
+  inset: 2.8rem;
+}
+
+.action-card__icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-bottom: 0.55rem;
+}
+
+.action-card__title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.action-card__desc {
+  font-size: 0.95rem;
+  opacity: 0.86;
+}
+
+.action-card__arrow {
+  margin-top: auto;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.action-card--lost {
+  background: var(--color-forest);
+  color: var(--color-ivory);
+}
+
+.action-card--lost .action-card__arrow {
+  background: var(--color-ivory);
+  color: var(--color-forest);
+}
+
+.action-card--found {
+  background: var(--color-ivory);
+  color: var(--color-forest);
+  border: 1px solid color-mix(in srgb, var(--color-forest) 10%, transparent);
+}
+
+.action-card--found .action-card__arrow {
+  background: var(--color-forest);
+  color: var(--color-ivory);
+}
+
+.trust-strip {
+  background: color-mix(in srgb, var(--color-ivory) 70%, white);
+  border-block: 1px solid color-mix(in srgb, var(--color-forest) 8%, transparent);
+}
+
+.trust-strip__list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem;
+  max-width: var(--content-max);
+  display: grid;
+  gap: 1.25rem;
+}
+
+.trust-strip__list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  color: var(--color-forest);
+}
+
+.trust-strip__list svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-top: 0.15rem;
+}
+
+.trust-strip__list strong {
+  display: block;
+  font-size: 0.98rem;
+}
+
+.trust-strip__list p {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  color: var(--color-forest-muted);
+}
+
+.recent-found {
+  padding: var(--space-section) 0 calc(var(--space-section) + 1rem);
+  background: var(--color-ivory);
+}
+
+.recent-found__inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.recent-found__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.recent-found__view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: var(--color-forest);
+}
+
+.recent-found__view-all:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.recent-found__note {
+  margin: 0 0 1.25rem;
+  font-size: 0.85rem;
+  color: var(--color-forest-muted);
+}
+
+.recent-found__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+.item-card {
+  display: grid;
+  background: color-mix(in srgb, var(--color-ivory) 55%, white);
+  border: 1px solid color-mix(in srgb, var(--color-forest) 8%, transparent);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.item-card:hover,
+.item-card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.item-card__media {
+  aspect-ratio: 1.15 / 1;
+  background:
+    radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--color-ivory) 80%, white), transparent 55%),
+    color-mix(in srgb, var(--color-forest) 8%, var(--color-ivory));
+  position: relative;
+}
+
+.item-card__badge {
+  position: absolute;
+  inset: 18% 18%;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--color-forest) 14%, var(--color-ivory));
+  border: 1px solid color-mix(in srgb, var(--color-forest) 12%, transparent);
+}
+
+.item-card__media--phone .item-card__badge {
+  inset: 16% 32%;
+  border-radius: 0.9rem;
+}
+
+.item-card__media--bag .item-card__badge {
+  inset: 18% 22%;
+  border-radius: 1.1rem 1.1rem 0.7rem 0.7rem;
+}
+
+.item-card__media--keys .item-card__badge {
+  inset: 28% 20%;
+  border-radius: 999px;
+}
+
+.item-card__media--card .item-card__badge {
+  inset: 28% 18%;
+  border-radius: 0.55rem;
+}
+
+.item-card__body {
+  padding: 1rem 1rem 1.1rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.item-card__body h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.item-card__body p,
+.item-card__body time {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-forest-muted);
+}
+
+.item-card__cta {
+  margin-top: 0.55rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+@media (min-width: 640px) {
+  .welcome-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .recent-found__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .welcome-hero__content {
+    padding-bottom: 3.25rem;
+  }
+
+  .welcome-hero__image {
+    object-position: center center;
+  }
+
+  .trust-strip__list {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    padding-block: 1.75rem;
+  }
+
+  .trust-strip__list li {
+    padding: 0 1.1rem;
+  }
+
+  .trust-strip__list li:not(:last-child) {
+    border-right: 1px solid color-mix(in srgb, var(--color-forest) 12%, transparent);
+  }
+
+  .recent-found__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .welcome-hero__image {
+    object-position: 78% center;
+  }
+
+  .welcome-hero__veil {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--color-ivory) 55%, transparent) 0%,
+        color-mix(in srgb, var(--color-ivory) 78%, transparent) 42%,
+        color-mix(in srgb, var(--color-ivory) 92%, transparent) 100%
+      );
+  }
+}
