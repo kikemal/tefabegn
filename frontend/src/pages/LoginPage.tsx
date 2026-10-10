@@ -1,6 +1,6 @@
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useId, useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { loginRequest } from "../api/auth";
 import { ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
@@ -18,6 +18,7 @@ const THEME_LABELS = {
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setSession } = useAuth();
   const emailId = useId();
   const passwordId = useId();
@@ -66,7 +67,12 @@ export function LoginPage() {
     try {
       const session = await loginRequest(email.trim(), password);
       setSession(session.user, session.tokens);
-      navigate("/dashboard", { replace: true });
+      const from = (location.state as { from?: string } | null)?.from;
+      const dest =
+        typeof from === "string" && from.startsWith("/") && !from.startsWith("//")
+          ? from
+          : "/dashboard";
+      navigate(dest, { replace: true });
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.code === "ACCOUNT_DISABLED") {

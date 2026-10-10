@@ -23,10 +23,14 @@ export type AuthSession = {
 };
 
 export function loginRequest(email: string, password: string) {
-  return apiRequest<AuthSession>("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
+  return apiRequest<AuthSession>(
+    "/auth/login",
+    {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    },
+    { skipAuthRefresh: true },
+  );
 }
 
 export function registerRequest(input: {
@@ -34,17 +38,36 @@ export function registerRequest(input: {
   password: string;
   fullName: string;
 }) {
-  return apiRequest<AuthSession>("/auth/register", {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
+  return apiRequest<AuthSession>(
+    "/auth/register",
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+    { skipAuthRefresh: true },
+  );
 }
 
 export function logoutRequest(refreshToken: string) {
-  return apiRequest<{ loggedOut: true }>("/auth/logout", {
-    method: "POST",
-    body: JSON.stringify({ refreshToken }),
-  });
+  return apiRequest<{ loggedOut: true }>(
+    "/auth/logout",
+    {
+      method: "POST",
+      body: JSON.stringify({ refreshToken }),
+    },
+    { skipAuthRefresh: true },
+  );
+}
+
+export function refreshRequest(refreshToken: string) {
+  return apiRequest<{ tokens: AuthTokens }>(
+    "/auth/refresh",
+    {
+      method: "POST",
+      body: JSON.stringify({ refreshToken }),
+    },
+    { skipAuthRefresh: true },
+  );
 }
 
 export function meRequest(accessToken: string) {

@@ -31,6 +31,7 @@ export const dashboardAm: DashboardCopy = {
     returned: "ተመልሷል",
     mockStatsNote: "የቅድመ እይታ ቁጥሮች — ኤፒአይ ሲገኝ በቀጥታ መረጃ ይተካል።",
     liveStatsNote: "ከጠፉ እና ከተገኙ ሪፖርቶችዎ የተገኙ ቁጥሮች።",
+    statsErrorNote: "የሪፖርት ስታቲስቲክስን መጫን አልተቻለም። ትንሽ ቆይተው እንደገና ይሞክሩ።",
     reportLostTitle: "የጠፋ እቃ ሪፖርት",
     reportLostDesc: "ምን እንደጠፋ ይንገሩን።",
     reportLostCta: "የጠፋ እቃ ሪፖርት አድርግ",

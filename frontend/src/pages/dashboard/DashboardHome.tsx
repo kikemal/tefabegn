@@ -12,7 +12,6 @@ import { Link } from "react-router-dom";
 import { listMyFoundReports, listMyLostReports, type PublicReport } from "../../api/reports";
 import { useAuth } from "../../auth/AuthContext";
 import { StatusBadge } from "../../components/dashboard/StatusBadge";
-import { MOCK_DASHBOARD_STATS, MOCK_RECENT_ACTIVITY } from "../../data/mockDashboard";
 import { useLocale } from "../../i18n/context";
 
 type ActivityRow = {
@@ -64,7 +63,7 @@ function summarize(reports: PublicReport[]) {
 export function DashboardHome() {
   const { t, locale } = useLocale();
   const { user, accessToken } = useAuth();
-  const [usingMock, setUsingMock] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [stats, setStats] = useState({
     activeReports: 0,
     possibleMatches: 0,
@@ -82,11 +81,15 @@ export function DashboardHome() {
 
     async function load() {
       if (!accessToken) {
-        setUsingMock(true);
+        setLoadError(true);
+        setStats({ activeReports: 0, possibleMatches: 0, inProgress: 0, returned: 0 });
+        setActivity([]);
         setLoading(false);
         return;
       }
 
+      setLoading(true);
+      setLoadError(false);
       try {
         const [lost, found] = await Promise.all([
           listMyLostReports(accessToken),
@@ -110,17 +113,12 @@ export function DashboardHome() {
             statusLabel: r.statusLabel,
           }));
         setActivity(rows);
-        setUsingMock(false);
+        setLoadError(false);
       } catch {
         if (cancelled) return;
-        setUsingMock(true);
-        setStats({
-          activeReports: MOCK_DASHBOARD_STATS.activeReports,
-          possibleMatches: MOCK_DASHBOARD_STATS.possibleMatches,
-          inProgress: MOCK_DASHBOARD_STATS.inProgress,
-          returned: MOCK_DASHBOARD_STATS.returned,
-        });
-        setActivity(MOCK_RECENT_ACTIVITY);
+        setLoadError(true);
+        setStats({ activeReports: 0, possibleMatches: 0, inProgress: 0, returned: 0 });
+        setActivity([]);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -151,11 +149,11 @@ export function DashboardHome() {
         <p>{t.dash.home.subtitle}</p>
       </header>
 
-      <p className="dash-note">
+      <p className={`dash-note${loadError ? " dash-error" : ""}`}>
         {loading
           ? t.dash.browse.loading
-          : usingMock
-            ? t.dash.home.mockStatsNote
+          : loadError
+            ? t.dash.home.statsErrorNote
             : t.dash.home.liveStatsNote}
       </p>
 

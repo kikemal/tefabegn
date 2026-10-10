@@ -29,6 +29,7 @@ export const dashboardEn = {
     returned: "Returned",
     mockStatsNote: "Showing preview counts — connect to live reports when the API is available.",
     liveStatsNote: "Counts from your lost and found reports.",
+    statsErrorNote: "Could not load your report statistics. Try again shortly.",
     reportLostTitle: "Report a Lost Item",
     reportLostDesc: "Tell us what you lost.",
     reportLostCta: "Report Lost Item",
