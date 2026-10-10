@@ -1,5 +1,7 @@
 import {
   ClaimStatus,
+  MatchStatus,
+  Prisma,
   ReportStatus,
   ReportType,
   Role,
@@ -23,6 +25,34 @@ import {
 } from "../workflow";
 import { toClaimResponse } from "./mappers";
 import type { CreateClaimInput } from "./validation";
+
+function isClaimUniqueViolation(error: unknown): boolean {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+}
+
+async function resolveReportStatusAfterLastClaim(
+  tx: Prisma.TransactionClient,
+  reportId: string,
+  current: ReportStatus,
+): Promise<void> {
+  if (current !== ReportStatus.CLAIM_PENDING) {
+    return;
+  }
+
+  const hasSuggestion = await tx.match.findFirst({
+    where: {
+      status: MatchStatus.SUGGESTED,
+      OR: [{ lostReportId: reportId }, { foundReportId: reportId }],
+    },
+    select: { id: true },
+  });
+  const next = hasSuggestion ? ReportStatus.POSSIBLE_MATCH : ReportStatus.ACTIVE;
+  assertReportTransition(current, next);
+  await tx.itemReport.update({
+    where: { id: reportId },
+    data: { status: next },
+  });
+}
 
 type ClaimWithRelations = Claim & {
   foundReport: ItemReport | null;
@@ -96,67 +126,103 @@ export async function createClaim(user: AuthenticatedUser, input: CreateClaimInp
     );
   }
 
-  const existingActive = await prisma.claim.findFirst({
-    where: {
-      claimantId: user.id,
-      foundReportId: foundReport.id,
-      status: { in: [...ACTIVE_CLAIM_STATUSES] },
-    },
-  });
-  if (existingActive) {
-    throw new AppError(
-      409,
-      "DUPLICATE_CLAIM",
-      "You already have an active claim on this found item",
-    );
-  }
+  const foundReportId = foundReport.id;
+  const lostReportId = lostReport?.id ?? null;
+  const matchId = match?.id ?? null;
 
-  const conflictingCount = await prisma.claim.count({
-    where: {
-      foundReportId: foundReport.id,
-      status: { in: [...ACTIVE_CLAIM_STATUSES] },
-    },
-  });
+  let claim: ClaimWithRelations;
+  let conflictingCount: number;
 
-  const claim = await prisma.claim.create({
-    data: {
-      claimantId: user.id,
-      foundReportId: foundReport.id,
-      matchId: match?.id,
-      message: input.message,
-      evidence: input.evidence,
-      proofRef: input.proofRef,
-      status: ClaimStatus.SUBMITTED,
-    },
-    include: {
-      foundReport: true,
-      match: true,
-    },
-  });
+  try {
+    ({ claim, conflictingCount } = await prisma.$transaction(async (tx) => {
+      const lockedFound = await tx.itemReport.findUnique({ where: { id: foundReportId } });
+      if (!lockedFound || lockedFound.type !== ReportType.FOUND) {
+        throw new AppError(404, "REPORT_NOT_FOUND", "Found report not found");
+      }
+      if (!CLAIMABLE_FOUND_STATUSES.includes(lockedFound.status)) {
+        throw new AppError(409, "INVALID_STATUS", "This found report cannot be claimed");
+      }
 
-  if (REPORT_STATUSES_ENTERING_CLAIM.includes(foundReport.status)) {
-    assertReportTransition(foundReport.status, ReportStatus.CLAIM_PENDING);
-    await prisma.itemReport.update({
-      where: { id: foundReport.id },
-      data: { status: ReportStatus.CLAIM_PENDING },
-    });
-  }
+      const existingActive = await tx.claim.findFirst({
+        where: {
+          claimantId: user.id,
+          foundReportId,
+          status: { in: [...ACTIVE_CLAIM_STATUSES] },
+        },
+      });
+      if (existingActive) {
+        throw new AppError(
+          409,
+          "DUPLICATE_CLAIM",
+          "You already have an active claim on this found item",
+        );
+      }
 
-  if (lostReport && REPORT_STATUSES_ENTERING_CLAIM.includes(lostReport.status)) {
-    assertReportTransition(lostReport.status, ReportStatus.CLAIM_PENDING);
-    await prisma.itemReport.update({
-      where: { id: lostReport.id },
-      data: { status: ReportStatus.CLAIM_PENDING },
-    });
+      const competitors = await tx.claim.count({
+        where: {
+          foundReportId,
+          status: { in: [...ACTIVE_CLAIM_STATUSES] },
+        },
+      });
+
+      const created = await tx.claim.create({
+        data: {
+          claimantId: user.id,
+          foundReportId,
+          matchId,
+          message: input.message,
+          evidence: input.evidence,
+          proofRef: input.proofRef,
+          status: ClaimStatus.SUBMITTED,
+        },
+        include: {
+          foundReport: true,
+          match: true,
+        },
+      });
+
+      if (REPORT_STATUSES_ENTERING_CLAIM.includes(lockedFound.status)) {
+        assertReportTransition(lockedFound.status, ReportStatus.CLAIM_PENDING);
+        await tx.itemReport.update({
+          where: { id: foundReportId },
+          data: { status: ReportStatus.CLAIM_PENDING },
+        });
+      }
+
+      if (lostReportId) {
+        const lockedLost = await tx.itemReport.findUnique({ where: { id: lostReportId } });
+        if (lockedLost && REPORT_STATUSES_ENTERING_CLAIM.includes(lockedLost.status)) {
+          assertReportTransition(lockedLost.status, ReportStatus.CLAIM_PENDING);
+          await tx.itemReport.update({
+            where: { id: lostReportId },
+            data: { status: ReportStatus.CLAIM_PENDING },
+          });
+        }
+      }
+
+      return { claim: created, conflictingCount: competitors };
+    }));
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    if (isClaimUniqueViolation(error)) {
+      throw new AppError(
+        409,
+        "DUPLICATE_CLAIM",
+        "You already have an active claim on this found item",
+      );
+    }
+    throw error;
   }
 
   await recordCaseEvent({
-    reportId: foundReport.id,
+    reportId: foundReportId,
     claimId: claim.id,
     actorId: user.id,
     eventType: CaseEventType.CLAIM_SUBMITTED,
     metadata: {
-      matchId: match?.id ?? null,
+      matchId,
       conflictingActiveClaims: conflictingCount,
     },
   });
@@ -164,7 +230,7 @@ export async function createClaim(user: AuthenticatedUser, input: CreateClaimInp
   await notifyClaimSubmitted({
     claimId: claim.id,
     claimantId: user.id,
-    foundReport,
+    foundReport: claim.foundReport ?? foundReport,
     lostReporterId: lostReport?.reporterId ?? null,
   });
 
@@ -179,6 +245,7 @@ export async function listMyClaims(userId: string) {
     where: { claimantId: userId },
     include: { foundReport: true, match: true },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: 100,
   });
   return claims.map((claim) => toClaimResponse(claim));
 }
@@ -238,10 +305,46 @@ export async function withdrawClaim(user: AuthenticatedUser, claimId: string) {
 
   assertClaimTransition(claim.status, ClaimStatus.WITHDRAWN);
 
-  const updated = await prisma.claim.update({
-    where: { id: claimId },
-    data: { status: ClaimStatus.WITHDRAWN },
-    include: { foundReport: true, match: true },
+  const updated = await prisma.$transaction(async (tx) => {
+    const withdrawn = await tx.claim.update({
+      where: { id: claimId },
+      data: { status: ClaimStatus.WITHDRAWN },
+      include: { foundReport: true, match: true },
+    });
+
+    if (!withdrawn.foundReportId) {
+      return withdrawn;
+    }
+
+    const remainingActive = await tx.claim.count({
+      where: {
+        foundReportId: withdrawn.foundReportId,
+        status: { in: [...ACTIVE_CLAIM_STATUSES] },
+      },
+    });
+
+    if (remainingActive === 0) {
+      const found = await tx.itemReport.findUnique({ where: { id: withdrawn.foundReportId } });
+      if (found) {
+        await resolveReportStatusAfterLastClaim(tx, found.id, found.status);
+      }
+
+      if (withdrawn.matchId) {
+        const linkedMatch = await tx.match.findUnique({
+          where: { id: withdrawn.matchId },
+          include: { lostReport: true },
+        });
+        if (linkedMatch) {
+          await resolveReportStatusAfterLastClaim(
+            tx,
+            linkedMatch.lostReport.id,
+            linkedMatch.lostReport.status,
+          );
+        }
+      }
+    }
+
+    return withdrawn;
   });
 
   await recordCaseEvent({

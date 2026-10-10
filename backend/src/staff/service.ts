@@ -1,10 +1,18 @@
 import {
   ClaimStatus,
   MatchStatus,
+  Prisma,
   ReportStatus,
   ReportType,
+  type Claim,
   type ItemReport,
+  type Match,
 } from "@prisma/client";
+
+type ClaimWithFoundMatch = Claim & {
+  foundReport: ItemReport | null;
+  match: Match | null;
+};
 import { recordCaseEvent } from "../audit/service";
 import { CaseEventType } from "../audit/types";
 import { toClaimResponse } from "../claims/mappers";
@@ -189,57 +197,91 @@ export async function decideClaim(
   }
   assertReportTransition(claim.foundReport.status, ReportStatus.APPROVED);
 
-  const { approved: updated, rejectedCompetitorIds } = await prisma.$transaction(async (tx) => {
-    const approved = await tx.claim.update({
-      where: { id: claimId },
-      data: { status: ClaimStatus.APPROVED },
-      include: { foundReport: true, match: true },
-    });
+  let updated: ClaimWithFoundMatch;
+  let rejectedCompetitors: { id: string; claimantId: string }[];
 
-    await tx.itemReport.update({
-      where: { id: claim.foundReport!.id },
-      data: { status: ReportStatus.APPROVED },
-    });
+  try {
+    ({ approved: updated, rejectedCompetitors } = await prisma.$transaction(async (tx) => {
+      const alreadyApproved = await tx.claim.findFirst({
+        where: {
+          foundReportId: claim.foundReportId!,
+          status: ClaimStatus.APPROVED,
+          id: { not: claimId },
+        },
+        select: { id: true },
+      });
+      if (alreadyApproved) {
+        throw new AppError(
+          409,
+          "INVALID_STATUS",
+          "Another claim is already approved for this found item",
+        );
+      }
 
-    if (claim.match?.lostReport) {
-      const lost = claim.match.lostReport;
-      if (REPORT_STATUSES_APPROVABLE.includes(lost.status)) {
-        assertReportTransition(lost.status, ReportStatus.APPROVED);
-        await tx.itemReport.update({
-          where: { id: lost.id },
-          data: { status: ReportStatus.APPROVED },
+      const approved = await tx.claim.update({
+        where: { id: claimId },
+        data: { status: ClaimStatus.APPROVED },
+        include: { foundReport: true, match: true },
+      });
+
+      await tx.itemReport.update({
+        where: { id: claim.foundReport!.id },
+        data: { status: ReportStatus.APPROVED },
+      });
+
+      if (claim.match?.lostReport) {
+        const lost = claim.match.lostReport;
+        if (REPORT_STATUSES_APPROVABLE.includes(lost.status)) {
+          assertReportTransition(lost.status, ReportStatus.APPROVED);
+          await tx.itemReport.update({
+            where: { id: lost.id },
+            data: { status: ReportStatus.APPROVED },
+          });
+        }
+        assertMatchTransition(claim.match.status, MatchStatus.ACCEPTED_FOR_REVIEW);
+        await tx.match.update({
+          where: { id: claim.match.id },
+          data: { status: MatchStatus.ACCEPTED_FOR_REVIEW },
         });
       }
-      assertMatchTransition(claim.match.status, MatchStatus.ACCEPTED_FOR_REVIEW);
-      await tx.match.update({
-        where: { id: claim.match.id },
-        data: { status: MatchStatus.ACCEPTED_FOR_REVIEW },
-      });
-    }
 
-    // Competing active claims on the same found item are rejected.
-    const competitors = await tx.claim.findMany({
-      where: {
-        foundReportId: claim.foundReportId!,
-        id: { not: claimId },
-        status: { in: [...ACTIVE_CLAIM_STATUSES] },
-      },
-    });
-    for (const competitor of competitors) {
-      assertClaimTransition(competitor.status, ClaimStatus.REJECTED);
-    }
-    if (competitors.length > 0) {
-      await tx.claim.updateMany({
-        where: { id: { in: competitors.map((c) => c.id) } },
-        data: { status: ClaimStatus.REJECTED },
+      // Competing active claims on the same found item are rejected.
+      const competitors = await tx.claim.findMany({
+        where: {
+          foundReportId: claim.foundReportId!,
+          id: { not: claimId },
+          status: { in: [...ACTIVE_CLAIM_STATUSES] },
+        },
+        select: { id: true, claimantId: true, status: true },
       });
-    }
+      for (const competitor of competitors) {
+        assertClaimTransition(competitor.status, ClaimStatus.REJECTED);
+      }
+      if (competitors.length > 0) {
+        await tx.claim.updateMany({
+          where: { id: { in: competitors.map((c) => c.id) } },
+          data: { status: ClaimStatus.REJECTED },
+        });
+      }
 
-    return {
-      approved,
-      rejectedCompetitorIds: competitors.map((c) => c.id),
-    };
-  });
+      return {
+        approved,
+        rejectedCompetitors: competitors.map((c) => ({ id: c.id, claimantId: c.claimantId })),
+      };
+    }));
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      throw new AppError(
+        409,
+        "INVALID_STATUS",
+        "Another claim is already approved for this found item",
+      );
+    }
+    throw error;
+  }
 
   await recordCaseEvent({
     reportId: updated.foundReportId ?? undefined,
@@ -257,11 +299,7 @@ export async function decideClaim(
       lostReporterId: claim.match?.lostReport?.reporterId ?? null,
     });
 
-    for (const competitorId of rejectedCompetitorIds) {
-      const competitor = await prisma.claim.findUnique({ where: { id: competitorId } });
-      if (!competitor) {
-        continue;
-      }
+    for (const competitor of rejectedCompetitors) {
       await notifyClaimRejected({
         claimId: competitor.id,
         claimantId: competitor.claimantId,
@@ -294,14 +332,28 @@ export async function markFoundReadyForHandover(
 
   const approvedClaim = await prisma.claim.findFirst({
     where: { foundReportId, status: ClaimStatus.APPROVED },
+    include: { match: { include: { lostReport: true } } },
   });
   if (!approvedClaim) {
     throw new AppError(409, "INVALID_STATUS", "An approved claim is required before handover");
   }
 
-  const updated: ItemReport = await prisma.itemReport.update({
-    where: { id: foundReportId },
-    data: { status: ReportStatus.HANDOVER_PENDING },
+  const updated = await prisma.$transaction(async (tx) => {
+    const foundUpdated = await tx.itemReport.update({
+      where: { id: foundReportId },
+      data: { status: ReportStatus.HANDOVER_PENDING },
+    });
+
+    const lost = approvedClaim.match?.lostReport;
+    if (lost && lost.status === ReportStatus.APPROVED) {
+      assertReportTransition(lost.status, ReportStatus.HANDOVER_PENDING);
+      await tx.itemReport.update({
+        where: { id: lost.id },
+        data: { status: ReportStatus.HANDOVER_PENDING },
+      });
+    }
+
+    return foundUpdated;
   });
 
   await recordCaseEvent({
@@ -312,6 +364,7 @@ export async function markFoundReadyForHandover(
     metadata: {
       notes: input.notes ?? null,
       publicSummary: toPublicFoundReport(updated),
+      lostReportId: approvedClaim.match?.lostReportId ?? null,
     },
   });
 

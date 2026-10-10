@@ -610,6 +610,8 @@ Use the chosen API documentation standard consistently.
 
 ## TASK-018 — Automated Tests
 
+**Status:** Completed
+
 ### Goal
 
 Build a meaningful backend test suite.
@@ -637,6 +639,8 @@ Business rules and security tests are more important than superficial line cover
 
 ## TASK-019 — Backend Integration Review
 
+**Status:** Completed
+
 ### Goal
 
 Review all modules together.
@@ -656,6 +660,8 @@ Review all modules together.
 ---
 
 ## TASK-020 — Backend v1 Freeze
+
+**Status:** Completed
 
 ### Goal
 

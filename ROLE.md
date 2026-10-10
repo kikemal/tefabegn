@@ -15,9 +15,9 @@ The human developer is the sole:
 
 ## Current Mission
 
-Build the backend of the University Campus Lost & Found System according to the ordered tasks in `TASKS.md`.
+Backend v1 is **frozen** (`BACKEND-V1.md`, TASK-020). Frontend welcome UI is in `frontend/`. Do not expand backend features or unrelated UI until the human developer explicitly requests it.
 
-The frontend is intentionally postponed until the human developer supplies the UI/design.
+Until then: only human-authorized contract-preserving fixes, documentation, or explicitly requested tasks.
 
 ## Before Every Task
 

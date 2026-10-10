@@ -178,6 +178,8 @@ model Claim {
   @@index([foundReportId])
   @@index([matchId])
   @@index([status, createdAt])
+  /// Partial unique indexes (see migration): one active claim per claimant+found;
+  /// one APPROVED claim per found item.
 }
 
 model Notification {

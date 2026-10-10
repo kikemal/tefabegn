@@ -1,0 +1,36 @@
+:root {
+  --color-forest: #123c32;
+  --color-ivory: #f5ebdd;
+
+  --color-forest-soft: color-mix(in srgb, var(--color-forest) 88%, white);
+  --color-forest-deep: color-mix(in srgb, var(--color-forest) 92%, black);
+  --color-forest-muted: color-mix(in srgb, var(--color-forest) 72%, white);
+  --color-ivory-soft: color-mix(in srgb, var(--color-ivory) 70%, white);
+  --color-ivory-strong: color-mix(in srgb, var(--color-ivory) 85%, var(--color-forest));
+
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-ethiopic: "Noto Sans Ethiopic", "DM Sans", system-ui, sans-serif;
+
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 12px 32px color-mix(in srgb, var(--color-forest) 14%, transparent);
+  --shadow-soft: 0 6px 18px color-mix(in srgb, var(--color-forest) 10%, transparent);
+
+  --header-height: 4.5rem;
+  --content-max: 72rem;
+  --space-section: clamp(2.5rem, 5vw, 4.5rem);
+
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-ivory) 55%, transparent),
+    0 0 0 5px var(--color-forest);
+}
+
+html[lang="am"] {
+  --font-ui: var(--font-ethiopic);
+}
+
+html[lang="en"] {
+  --font-ui: var(--font-sans);
+}
