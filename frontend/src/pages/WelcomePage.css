@@ -1,5 +1,5 @@
 .welcome {
-  background: var(--color-ivory);
+  background: var(--color-bg);
 }
 
 .welcome-hero {
@@ -27,20 +27,7 @@
 .welcome-hero__veil {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--color-ivory) 88%, transparent) 0%,
-      color-mix(in srgb, var(--color-ivory) 72%, transparent) 38%,
-      color-mix(in srgb, var(--color-ivory) 18%, transparent) 68%,
-      transparent 100%
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--color-ivory) 35%, transparent) 0%,
-      transparent 28%,
-      color-mix(in srgb, var(--color-ivory) 55%, transparent) 100%
-    );
+  background: var(--hero-veil-horizontal), var(--hero-veil-vertical);
 }
 
 .welcome-hero__content {
@@ -59,13 +46,13 @@
   letter-spacing: 0.14em;
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--color-forest);
+  color: var(--color-text);
 }
 
 .welcome-hero__eyebrow-rule {
   width: 1.5rem;
   height: 2px;
-  background: var(--color-forest);
+  background: var(--color-text);
   border-radius: 999px;
 }
 
@@ -76,7 +63,7 @@
   line-height: 1.05;
   letter-spacing: -0.03em;
   font-weight: 700;
-  color: var(--color-forest);
+  color: var(--color-text);
 }
 
 .welcome-hero__title span {
@@ -87,7 +74,7 @@
   margin: 1.1rem 0 0;
   max-width: 34rem;
   font-size: clamp(1rem, 2vw, 1.15rem);
-  color: var(--color-forest-soft);
+  color: var(--color-text-soft);
 }
 
 .welcome-actions {
@@ -167,28 +154,28 @@
 
 .action-card--lost {
   background: var(--color-forest);
-  color: var(--color-ivory);
+  color: var(--color-on-forest);
 }
 
 .action-card--lost .action-card__arrow {
-  background: var(--color-ivory);
+  background: var(--color-on-forest);
   color: var(--color-forest);
 }
 
 .action-card--found {
-  background: var(--color-ivory);
-  color: var(--color-forest);
-  border: 1px solid color-mix(in srgb, var(--color-forest) 10%, transparent);
+  background: var(--color-action-found-bg);
+  color: var(--color-action-found-text);
+  border: 1px solid var(--color-action-found-border);
 }
 
 .action-card--found .action-card__arrow {
   background: var(--color-forest);
-  color: var(--color-ivory);
+  color: var(--color-on-forest);
 }
 
 .trust-strip {
-  background: color-mix(in srgb, var(--color-ivory) 70%, white);
-  border-block: 1px solid color-mix(in srgb, var(--color-forest) 8%, transparent);
+  background: var(--color-surface-muted);
+  border-block: 1px solid var(--color-border);
 }
 
 .trust-strip__list {
@@ -205,7 +192,7 @@
   grid-template-columns: auto 1fr;
   gap: 0.85rem;
   align-items: start;
-  color: var(--color-forest);
+  color: var(--color-text);
 }
 
 .trust-strip__list svg {
@@ -222,12 +209,12 @@
 .trust-strip__list p {
   margin: 0.2rem 0 0;
   font-size: 0.9rem;
-  color: var(--color-forest-muted);
+  color: var(--color-text-muted);
 }
 
 .recent-found {
   padding: var(--space-section) 0 calc(var(--space-section) + 1rem);
-  background: var(--color-ivory);
+  background: var(--color-bg);
 }
 
 .recent-found__inner {
@@ -250,7 +237,7 @@
   align-items: center;
   gap: 0.4rem;
   font-weight: 600;
-  color: var(--color-forest);
+  color: var(--color-text);
 }
 
 .recent-found__view-all:hover {
@@ -261,7 +248,7 @@
 .recent-found__note {
   margin: 0 0 1.25rem;
   font-size: 0.85rem;
-  color: var(--color-forest-muted);
+  color: var(--color-text-muted);
 }
 
 .recent-found__grid {
@@ -275,8 +262,8 @@
 
 .item-card {
   display: grid;
-  background: color-mix(in srgb, var(--color-ivory) 55%, white);
-  border: 1px solid color-mix(in srgb, var(--color-forest) 8%, transparent);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-soft);
@@ -292,8 +279,12 @@
 .item-card__media {
   aspect-ratio: 1.15 / 1;
   background:
-    radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--color-ivory) 80%, white), transparent 55%),
-    color-mix(in srgb, var(--color-forest) 8%, var(--color-ivory));
+    radial-gradient(
+      circle at 30% 30%,
+      color-mix(in srgb, var(--color-surface-elevated) 80%, transparent),
+      transparent 55%
+    ),
+    color-mix(in srgb, var(--color-forest) 8%, var(--color-surface-card));
   position: relative;
 }
 
@@ -301,8 +292,8 @@
   position: absolute;
   inset: 18% 18%;
   border-radius: 1rem;
-  background: color-mix(in srgb, var(--color-forest) 14%, var(--color-ivory));
-  border: 1px solid color-mix(in srgb, var(--color-forest) 12%, transparent);
+  background: color-mix(in srgb, var(--color-forest) 14%, var(--color-surface-card));
+  border: 1px solid var(--color-border);
 }
 
 .item-card__media--phone .item-card__badge {
@@ -340,7 +331,7 @@
 .item-card__body time {
   margin: 0;
   font-size: 0.88rem;
-  color: var(--color-forest-muted);
+  color: var(--color-text-muted);
 }
 
 .item-card__cta {
@@ -379,7 +370,7 @@
   }
 
   .trust-strip__list li:not(:last-child) {
-    border-right: 1px solid color-mix(in srgb, var(--color-forest) 12%, transparent);
+    border-right: 1px solid var(--color-border-strong);
   }
 
   .recent-found__grid {
@@ -393,12 +384,6 @@
   }
 
   .welcome-hero__veil {
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--color-ivory) 55%, transparent) 0%,
-        color-mix(in srgb, var(--color-ivory) 78%, transparent) 42%,
-        color-mix(in srgb, var(--color-ivory) 92%, transparent) 100%
-      );
+    background: var(--hero-veil-mobile);
   }
 }

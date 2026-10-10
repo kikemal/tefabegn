@@ -1,12 +1,8 @@
 :root {
+  /* Brand (constant) */
   --color-forest: #123c32;
   --color-ivory: #f5ebdd;
-
-  --color-forest-soft: color-mix(in srgb, var(--color-forest) 88%, white);
-  --color-forest-deep: color-mix(in srgb, var(--color-forest) 92%, black);
-  --color-forest-muted: color-mix(in srgb, var(--color-forest) 72%, white);
-  --color-ivory-soft: color-mix(in srgb, var(--color-ivory) 70%, white);
-  --color-ivory-strong: color-mix(in srgb, var(--color-ivory) 85%, var(--color-forest));
+  --color-bg-deep: #102720;
 
   --font-sans: "DM Sans", system-ui, sans-serif;
   --font-ethiopic: "Noto Sans Ethiopic", "DM Sans", system-ui, sans-serif;
@@ -16,15 +12,128 @@
   --radius-lg: 1.25rem;
   --radius-pill: 999px;
 
-  --shadow-card: 0 12px 32px color-mix(in srgb, var(--color-forest) 14%, transparent);
-  --shadow-soft: 0 6px 18px color-mix(in srgb, var(--color-forest) 10%, transparent);
-
   --header-height: 4.5rem;
   --content-max: 72rem;
   --space-section: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+/* —— Light theme (default) —— */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --color-bg: var(--color-ivory);
+  --color-surface: color-mix(in srgb, var(--color-ivory) 55%, white);
+  --color-surface-muted: color-mix(in srgb, var(--color-ivory) 70%, white);
+  --color-surface-elevated: color-mix(in srgb, var(--color-ivory) 80%, white);
+  --color-surface-card: color-mix(in srgb, var(--color-ivory) 55%, white);
+  --color-text: var(--color-forest);
+  --color-text-muted: color-mix(in srgb, var(--color-forest) 72%, white);
+  --color-text-soft: color-mix(in srgb, var(--color-forest) 88%, white);
+  --color-border: color-mix(in srgb, var(--color-forest) 10%, transparent);
+  --color-border-strong: color-mix(in srgb, var(--color-forest) 18%, transparent);
+
+  --color-forest-soft: color-mix(in srgb, var(--color-forest) 88%, white);
+  --color-forest-deep: color-mix(in srgb, var(--color-forest) 92%, black);
+  --color-forest-muted: color-mix(in srgb, var(--color-forest) 72%, white);
+
+  --color-on-forest: var(--color-ivory);
+  --color-on-ivory: var(--color-forest);
+
+  --color-header-bg: color-mix(in srgb, var(--color-ivory) 88%, transparent);
+  --color-sign-in-bg: var(--color-forest);
+  --color-sign-in-text: var(--color-ivory);
+  --color-sign-in-bg-hover: var(--color-forest-deep);
+
+  --color-action-found-bg: var(--color-ivory);
+  --color-action-found-text: var(--color-forest);
+  --color-action-found-border: color-mix(in srgb, var(--color-forest) 10%, transparent);
+
+  --shadow-card: 0 12px 32px color-mix(in srgb, var(--color-forest) 14%, transparent);
+  --shadow-soft: 0 6px 18px color-mix(in srgb, var(--color-forest) 10%, transparent);
 
   --focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-ivory) 55%, transparent),
     0 0 0 5px var(--color-forest);
+
+  --hero-veil-horizontal: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-ivory) 88%, transparent) 0%,
+    color-mix(in srgb, var(--color-ivory) 72%, transparent) 38%,
+    color-mix(in srgb, var(--color-ivory) 18%, transparent) 68%,
+    transparent 100%
+  );
+  --hero-veil-vertical: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-ivory) 35%, transparent) 0%,
+    transparent 28%,
+    color-mix(in srgb, var(--color-ivory) 55%, transparent) 100%
+  );
+  --hero-veil-mobile: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-ivory) 55%, transparent) 0%,
+    color-mix(in srgb, var(--color-ivory) 78%, transparent) 42%,
+    color-mix(in srgb, var(--color-ivory) 92%, transparent) 100%
+  );
+}
+
+/* —— Dark theme —— */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: var(--color-bg-deep);
+  --color-surface: #163329;
+  --color-surface-muted: #1a3d32;
+  --color-surface-elevated: #1c4237;
+  --color-surface-card: #1e4639;
+
+  --color-text: var(--color-ivory);
+  --color-text-muted: color-mix(in srgb, var(--color-ivory) 68%, var(--color-bg-deep));
+  --color-text-soft: color-mix(in srgb, var(--color-ivory) 82%, var(--color-bg-deep));
+
+  --color-border: color-mix(in srgb, var(--color-ivory) 12%, transparent);
+  --color-border-strong: color-mix(in srgb, var(--color-ivory) 22%, transparent);
+
+  --color-forest-soft: color-mix(in srgb, var(--color-ivory) 88%, transparent);
+  --color-forest-deep: color-mix(in srgb, var(--color-forest) 55%, black);
+  --color-forest-muted: color-mix(in srgb, var(--color-ivory) 65%, transparent);
+
+  --color-on-forest: var(--color-ivory);
+  --color-on-ivory: var(--color-forest);
+
+  --color-header-bg: color-mix(in srgb, var(--color-bg-deep) 90%, transparent);
+  --color-sign-in-bg: color-mix(in srgb, var(--color-forest) 75%, var(--color-bg-deep));
+  --color-sign-in-text: var(--color-ivory);
+  --color-sign-in-bg-hover: color-mix(in srgb, var(--color-forest) 55%, black);
+
+  --color-action-found-bg: var(--color-surface-elevated);
+  --color-action-found-text: var(--color-ivory);
+  --color-action-found-border: var(--color-border);
+
+  --shadow-card: 0 12px 32px color-mix(in srgb, black 45%, transparent);
+  --shadow-soft: 0 6px 18px color-mix(in srgb, black 35%, transparent);
+
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-ivory) 35%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--color-ivory) 75%, transparent);
+
+  --hero-veil-horizontal: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-bg-deep) 92%, transparent) 0%,
+    color-mix(in srgb, var(--color-bg-deep) 78%, transparent) 40%,
+    color-mix(in srgb, var(--color-bg-deep) 35%, transparent) 68%,
+    transparent 100%
+  );
+  --hero-veil-vertical: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-bg-deep) 55%, transparent) 0%,
+    transparent 28%,
+    color-mix(in srgb, var(--color-bg-deep) 88%, transparent) 100%
+  );
+  --hero-veil-mobile: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-bg-deep) 70%, transparent) 0%,
+    color-mix(in srgb, var(--color-bg-deep) 88%, transparent) 42%,
+    color-mix(in srgb, var(--color-bg-deep) 96%, transparent) 100%
+  );
 }
 
 html[lang="am"] {

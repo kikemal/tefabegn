@@ -4,6 +4,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useLocale } from "../i18n/context";
 import { LanguageSelector } from "./LanguageSelector";
 import { Logo } from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
 import "./SiteHeader.css";
 
 const NAV_ITEMS = [
@@ -61,6 +62,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="site-header__actions">
+          <ThemeToggle className="site-header__theme" />
           <LanguageSelector className="site-header__lang" />
           <NavLink to="/sign-in" className="site-header__sign-in">
             <UserRound size={16} aria-hidden="true" />
@@ -99,7 +101,10 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="site-header__drawer-footer">
-          <LanguageSelector />
+          <div className="site-header__drawer-utilities">
+            <ThemeToggle />
+            <LanguageSelector />
+          </div>
           <NavLink to="/sign-in" className="site-header__sign-in site-header__sign-in--block">
             <UserRound size={16} aria-hidden="true" />
             <span>{t.nav.signIn}</span>

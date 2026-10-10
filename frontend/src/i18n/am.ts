@@ -24,6 +24,10 @@ export const am = {
     en: "EN",
     am: "አማ",
   },
+  theme: {
+    switchToLight: "ወደ ብርሃን ገጽታ ቀይር",
+    switchToDark: "ወደ ጨለማ ገጽታ ቀይር",
+  },
   hero: {
     eyebrow: "የእርስዎ ካምፓስ። አንድ ቦታ።",
     titleLine1: "አንድ ነገር ጠፍቷል?",

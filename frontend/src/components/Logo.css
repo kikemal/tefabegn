@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
-  color: var(--color-forest);
+  color: var(--color-text);
   min-width: 0;
 }
 
@@ -10,6 +10,7 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
+  color: var(--color-forest);
 }
 
 .brand-logo__text {
@@ -36,11 +37,11 @@
   display: none;
   margin-left: 0.35rem;
   padding-left: 0.75rem;
-  border-left: 1px solid color-mix(in srgb, var(--color-forest) 22%, transparent);
+  border-left: 1px solid var(--color-border-strong);
   font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.02em;
-  color: var(--color-forest-muted);
+  color: var(--color-text-muted);
   white-space: nowrap;
 }
 

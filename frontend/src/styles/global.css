@@ -22,14 +22,21 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  body {
+    transition: none;
+  }
 }
 
 body {
   margin: 0;
   min-width: 320px;
   font-family: var(--font-ui);
-  color: var(--color-forest);
-  background: var(--color-ivory);
+  color: var(--color-text);
+  background: var(--color-bg);
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
   line-height: 1.5;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

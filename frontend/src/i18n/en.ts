@@ -20,6 +20,10 @@ export type TranslationTree = {
     en: string;
     am: string;
   };
+  theme: {
+    switchToLight: string;
+    switchToDark: string;
+  };
   hero: {
     eyebrow: string;
     titleLine1: string;
@@ -92,6 +96,10 @@ export const en: TranslationTree = {
     label: "Language",
     en: "EN",
     am: "አማ",
+  },
+  theme: {
+    switchToLight: "Switch to light theme",
+    switchToDark: "Switch to dark theme",
   },
   hero: {
     eyebrow: "Your campus. One place.",

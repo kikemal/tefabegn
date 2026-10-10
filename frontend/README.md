@@ -27,6 +27,13 @@ npm run lint
 npm run build
 ```
 
+## Theme (light / dark)
+
+- Brand colors: forest `#123C32`, ivory `#F5EBDD`; dark surfaces use `#102720` and related greens.
+- First visit: follows `prefers-color-scheme`, with **light** as fallback.
+- Explicit choice: sun/moon toggle in the header; persisted in `localStorage` (`tefabign.theme`).
+- Flash prevention: `public/theme-init.js` runs before the app bundle.
+
 ## i18n
 
 - Default locale: **English** (`en`)

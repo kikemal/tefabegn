@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: var(--color-forest);
+  color: var(--color-text);
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -10,7 +10,7 @@
 .language-selector button {
   border: 0;
   background: transparent;
-  color: color-mix(in srgb, var(--color-forest) 55%, transparent);
+  color: var(--color-text-muted);
   padding: 0.25rem 0.15rem;
   border-radius: 0.35rem;
   transition: color 160ms ease;
@@ -18,7 +18,7 @@
 
 .language-selector button.is-active,
 .language-selector button:hover {
-  color: var(--color-forest);
+  color: var(--color-text);
 }
 
 .language-selector__sep {

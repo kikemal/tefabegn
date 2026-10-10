@@ -3,16 +3,17 @@
   display: grid;
   place-items: center;
   padding: 2rem 1.25rem;
-  background: var(--color-ivory);
+  background: var(--color-bg);
 }
 
 .placeholder-page__card {
   width: min(100%, 36rem);
-  background: color-mix(in srgb, var(--color-ivory) 60%, white);
-  border: 1px solid color-mix(in srgb, var(--color-forest) 10%, transparent);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 2rem 1.5rem;
   box-shadow: var(--shadow-soft);
+  color: var(--color-text);
 }
 
 .placeholder-page__card h1 {
@@ -22,7 +23,7 @@
 
 .placeholder-page__card p {
   margin: 0 0 1.5rem;
-  color: var(--color-forest-muted);
+  color: var(--color-text-muted);
 }
 
 .placeholder-page__back {
@@ -32,11 +33,11 @@
   min-height: 2.75rem;
   padding: 0.55rem 1.1rem;
   border-radius: var(--radius-pill);
-  background: var(--color-forest);
-  color: var(--color-ivory);
+  background: var(--color-sign-in-bg);
+  color: var(--color-sign-in-text);
   font-weight: 600;
 }
 
 .placeholder-page__back:hover {
-  background: var(--color-forest-deep);
+  background: var(--color-sign-in-bg-hover);
 }

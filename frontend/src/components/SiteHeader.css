@@ -2,9 +2,9 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--color-ivory) 88%, transparent);
+  background: var(--color-header-bg);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-forest) 8%, transparent);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .site-header__inner {
@@ -29,7 +29,7 @@
   position: relative;
   font-weight: 600;
   font-size: 0.95rem;
-  color: var(--color-forest);
+  color: var(--color-text);
   padding: 0.35rem 0;
   transition: opacity 160ms ease;
 }
@@ -45,15 +45,19 @@
   right: 0;
   bottom: -0.15rem;
   height: 2px;
-  background: var(--color-forest);
+  background: var(--color-text);
   border-radius: 999px;
 }
 
 .site-header__actions {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   justify-self: end;
+}
+
+.site-header__theme {
+  flex-shrink: 0;
 }
 
 .site-header__lang {
@@ -64,8 +68,8 @@
   display: none;
   align-items: center;
   gap: 0.4rem;
-  background: var(--color-forest);
-  color: var(--color-ivory);
+  background: var(--color-sign-in-bg);
+  color: var(--color-sign-in-text);
   border-radius: var(--radius-pill);
   padding: 0.55rem 1rem;
   font-weight: 600;
@@ -74,7 +78,7 @@
 }
 
 .site-header__sign-in:hover {
-  background: var(--color-forest-deep);
+  background: var(--color-sign-in-bg-hover);
   transform: translateY(-1px);
 }
 
@@ -89,16 +93,16 @@
   place-items: center;
   width: 2.5rem;
   height: 2.5rem;
-  border: 1px solid color-mix(in srgb, var(--color-forest) 18%, transparent);
+  border: 1px solid var(--color-border-strong);
   border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--color-ivory) 80%, white);
-  color: var(--color-forest);
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
 }
 
 .site-header__drawer {
   display: none;
-  border-top: 1px solid color-mix(in srgb, var(--color-forest) 10%, transparent);
-  background: var(--color-ivory);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
   padding: 1rem 1.25rem 1.5rem;
 }
 
@@ -115,17 +119,25 @@
   display: block;
   padding: 0.85rem 0.35rem;
   font-weight: 600;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-forest) 8%, transparent);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .site-header__drawer-link.is-active {
-  color: var(--color-forest);
+  color: var(--color-text);
 }
 
 .site-header__drawer-footer {
   margin-top: 1.25rem;
   display: grid;
   gap: 1rem;
+}
+
+.site-header__drawer-utilities {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 @media (min-width: 960px) {
