@@ -16,6 +16,7 @@ import {
   toPublicLostReport,
 } from "../reports/mappers";
 import type { AuthenticatedUser } from "../types/auth";
+import { notifyPossibleMatch } from "../notifications/emit";
 import { MATCHABLE_REPORT_STATUSES, assertReportTransition, matchStatusLabel } from "../workflow";
 import { scoreLostFoundPair } from "./scoring";
 import type { GenerateMatchesInput, ListMatchesQuery } from "./validation";
@@ -122,6 +123,15 @@ async function upsertSuggestion(
     signals: scored.signals,
   };
 
+  const existing = await prisma.match.findUnique({
+    where: {
+      lostReportId_foundReportId: {
+        lostReportId: lost.id,
+        foundReportId: found.id,
+      },
+    },
+  });
+
   const match = await prisma.match.upsert({
     where: {
       lostReportId_foundReportId: {
@@ -160,6 +170,16 @@ async function upsertSuggestion(
     lostReportId: lost.id,
     score: scored.score,
   });
+
+  // Notify only when a new suggestion is created (avoid spam on regenerate).
+  if (!existing) {
+    await notifyPossibleMatch({
+      matchId: match.id,
+      lostReport: lost,
+      foundReport: found,
+      score: scored.score,
+    });
+  }
 
   const refreshed = await prisma.match.findUnique({
     where: { id: match.id },

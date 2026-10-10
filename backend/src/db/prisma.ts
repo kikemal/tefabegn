@@ -20,5 +20,10 @@ export async function checkDatabaseConnection(): Promise<boolean> {
 }
 
 export async function disconnectDatabase(): Promise<void> {
+  // Keep the shared client alive across sequential vitest files.
+  // A process-level disconnect still runs via vitest global teardown.
+  if (process.env.NODE_ENV === "test") {
+    return;
+  }
   await prisma.$disconnect();
 }

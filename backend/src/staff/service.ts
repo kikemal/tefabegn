@@ -9,6 +9,12 @@ import {
 import { toClaimResponse } from "../claims/mappers";
 import { AppError } from "../middleware/errorHandler";
 import { prisma } from "../db/prisma";
+import {
+  notifyClaimApproved,
+  notifyClaimRejected,
+  notifyHandoverReady,
+  notifyMoreInfoRequested,
+} from "../notifications/emit";
 import { toOwnerFoundReport, toOwnerLostReport, toPublicFoundReport } from "../reports/mappers";
 import type { AuthenticatedUser } from "../types/auth";
 import { toVerificationPackage } from "../verification/mappers";
@@ -132,6 +138,14 @@ export async function decideClaim(
       metadata: { notes: input.notes, decision: input.decision },
     });
 
+    if (updated.foundReport) {
+      await notifyMoreInfoRequested({
+        claimId: updated.id,
+        claimantId: updated.claimantId,
+        foundReport: updated.foundReport,
+      });
+    }
+
     return { claim: toClaimResponse(updated), decision: input.decision };
   }
 
@@ -170,6 +184,14 @@ export async function decideClaim(
       metadata: { notes: input.notes, decision: input.decision },
     });
 
+    if (updated.foundReport) {
+      await notifyClaimRejected({
+        claimId: updated.id,
+        claimantId: updated.claimantId,
+        foundReport: updated.foundReport,
+      });
+    }
+
     return { claim: toClaimResponse(updated), decision: input.decision };
   }
 
@@ -184,7 +206,7 @@ export async function decideClaim(
   }
   assertReportTransition(claim.foundReport.status, ReportStatus.APPROVED);
 
-  const updated = await prisma.$transaction(async (tx) => {
+  const { approved: updated, rejectedCompetitorIds } = await prisma.$transaction(async (tx) => {
     const approved = await tx.claim.update({
       where: { id: claimId },
       data: { status: ClaimStatus.APPROVED },
@@ -230,7 +252,10 @@ export async function decideClaim(
       });
     }
 
-    return approved;
+    return {
+      approved,
+      rejectedCompetitorIds: competitors.map((c) => c.id),
+    };
   });
 
   await recordCaseEvent({
@@ -240,6 +265,27 @@ export async function decideClaim(
     eventType: "CLAIM_APPROVED",
     metadata: { notes: input.notes, decision: input.decision },
   });
+
+  if (updated.foundReport) {
+    await notifyClaimApproved({
+      claimId: updated.id,
+      claimantId: updated.claimantId,
+      foundReport: updated.foundReport,
+      lostReporterId: claim.match?.lostReport?.reporterId ?? null,
+    });
+
+    for (const competitorId of rejectedCompetitorIds) {
+      const competitor = await prisma.claim.findUnique({ where: { id: competitorId } });
+      if (!competitor) {
+        continue;
+      }
+      await notifyClaimRejected({
+        claimId: competitor.id,
+        claimantId: competitor.claimantId,
+        foundReport: updated.foundReport,
+      });
+    }
+  }
 
   return { claim: toClaimResponse(updated), decision: input.decision };
 }
@@ -284,6 +330,12 @@ export async function markFoundReadyForHandover(
       notes: input.notes ?? null,
       publicSummary: toPublicFoundReport(updated),
     },
+  });
+
+  await notifyHandoverReady({
+    claimId: approvedClaim.id,
+    claimantId: approvedClaim.claimantId,
+    foundReport: updated,
   });
 
   return {

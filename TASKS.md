@@ -429,6 +429,8 @@ An item cannot be marked returned by an ordinary user through an unprotected end
 
 ## TASK-014 — Notifications
 
+**Status:** Completed
+
 ### Goal
 Implement in-app notification infrastructure.
 

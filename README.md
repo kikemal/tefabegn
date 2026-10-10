@@ -200,6 +200,19 @@ Every decision writes a case/audit event (`CLAIM_APPROVED`, `CLAIM_REJECTED`, `C
 
 Ordinary users cannot mark an item returned. Recipient confirmation does not by itself set `RETURNED`.
 
+### Notifications (TASK-014)
+
+In-app notifications tied to business events. Text never includes private evidence.
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| GET | `/notifications` | Bearer | List own notifications (`unreadOnly`, `limit`) |
+| GET | `/notifications/unread-count` | Bearer | Unread count |
+| POST | `/notifications/:id/read` | Bearer | Mark one notification read |
+| POST | `/notifications/read-all` | Bearer | Mark all own notifications read |
+
+Event types: `POSSIBLE_MATCH`, `CLAIM_SUBMITTED`, `MORE_INFO_REQUESTED`, `CLAIM_APPROVED`, `CLAIM_REJECTED`, `HANDOVER_READY`, `ITEM_RETURNED`, `CASE_CLOSED`.
+
 ### Case status workflow (TASK-012)
 
 Status changes go through a shared state machine in `backend/src/workflow/`:

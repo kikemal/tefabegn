@@ -12,6 +12,7 @@ import {
 import { toClaimResponse } from "../claims/mappers";
 import { prisma } from "../db/prisma";
 import { AppError } from "../middleware/errorHandler";
+import { notifyCaseClosed, notifyItemReturned } from "../notifications/emit";
 import { toOwnerFoundReport, toOwnerLostReport } from "../reports/mappers";
 import type { AuthenticatedUser } from "../types/auth";
 import { assertClaimTransition, assertMatchTransition, assertReportTransition } from "../workflow";
@@ -115,6 +116,14 @@ export async function confirmReturnByStaff(
       returnedAt: returnedAt.toISOString(),
       lostReportId: approvedClaim.match?.lostReportId ?? null,
     },
+  });
+
+  await notifyItemReturned({
+    claimId: approvedClaim.id,
+    claimantId: approvedClaim.claimantId,
+    foundReport: result.updatedFound,
+    lostReporterId: approvedClaim.match?.lostReport?.reporterId ?? null,
+    returnedAt: returnedAt.toISOString(),
   });
 
   return {
@@ -280,6 +289,13 @@ export async function closeCaseByStaff(
         ? closedClaim.recipientConfirmedAt.toISOString()
         : null,
     },
+  });
+
+  await notifyCaseClosed({
+    claimId: closedClaim.id,
+    claimantId: closedClaim.claimantId,
+    foundReport: closedFound,
+    lostReporterId: closedLost?.reporterId ?? null,
   });
 
   return {

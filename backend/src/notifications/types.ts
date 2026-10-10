@@ -1,0 +1,12 @@
+export const NotificationType = {
+  POSSIBLE_MATCH: "POSSIBLE_MATCH",
+  CLAIM_SUBMITTED: "CLAIM_SUBMITTED",
+  MORE_INFO_REQUESTED: "MORE_INFO_REQUESTED",
+  CLAIM_APPROVED: "CLAIM_APPROVED",
+  CLAIM_REJECTED: "CLAIM_REJECTED",
+  HANDOVER_READY: "HANDOVER_READY",
+  ITEM_RETURNED: "ITEM_RETURNED",
+  CASE_CLOSED: "CASE_CLOSED",
+} as const;
+
+export type NotificationTypeName = (typeof NotificationType)[keyof typeof NotificationType];
